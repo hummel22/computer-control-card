@@ -34,8 +34,8 @@ jobs:
       - name: Verify HACS metadata and built artifact path
         run: |
           test -f hacs.json
-          test "$(node -p "require('./hacs.json').filename")" = "dist/computer-control-card.js"
-          test -f dist/computer-control-card.js
+          test "$(node -p "require('./hacs.json').filename")" = "computer-control-card.js"
+          test -f "dist/$(node -p "require('./hacs.json').filename")"
 
       - name: HACS validation
         uses: hacs/action@main
