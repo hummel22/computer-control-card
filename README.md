@@ -2,9 +2,10 @@
 
 A frontend-only Home Assistant Lovelace custom card for monitoring computer status, energy use, Wake-on-LAN, shutdown, and outlet controls from one dashboard tile.
 
-![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz/)
+[![Latest release](https://img.shields.io/github/v/release/hummel22/computer-control-card?sort=semver)](https://github.com/hummel22/computer-control-card/releases)
+[![Build and test](https://github.com/hummel22/computer-control-card/actions/workflows/ci.yml/badge.svg)](https://github.com/hummel22/computer-control-card/actions/workflows/ci.yml)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
 
 ## Preview
 
@@ -20,6 +21,7 @@ The card ships with compact and extended layouts so you can choose between dense
 
 - Monitor a computer summary entity, a dedicated online/status entity, outlet state, current power draw, and daily/monthly/total energy sensors.
 - Choose a `compact` dashboard card or an `extended` control panel.
+- Configure common fields through Home Assistant's dashboard visual editor.
 - Generate common actions from simple fields for Wake-on-LAN, shutdown, outlet on, and outlet off.
 - Override generated actions with custom Home Assistant service calls when your setup needs scripts, buttons, or integration-specific services.
 - Require confirmation before protected actions such as shutdown and hard outlet power-off.
@@ -98,7 +100,9 @@ The configured `entity` is used as the main display state and as a source for op
 
 ### Visual editor support
 
-This card is currently configured with YAML or the manual card editor. A dedicated Lovelace visual editor is not implemented yet; when one is added, this section should be updated with editor-specific instructions.
+Home Assistant can show this card in the dashboard visual editor. The editor exposes common fields for the card title, display name, primary/status/power/energy entities, Wake-on-LAN settings, shutdown and outlet entities, and the compact or extended variant. The generated stub configuration starts with a compact card named `Computer`; add your own entities and action targets before saving it to a real dashboard.
+
+Advanced options such as custom `actions`, `outlet_actions`, thresholds, and custom confirmation handlers should still be edited in YAML.
 
 ### Full YAML example
 
@@ -252,8 +256,10 @@ The standalone demo uses fixtures and a mocked Home Assistant object. Tests and 
 
 ## Releasing / updates
 
+Release instructions live in [docs/releasing.md](docs/releasing.md). In short, use `npm run release:patch`, `npm run release:minor`, or `npm run release:major` to bump the package version and create a matching `vX.Y.Z` tag, then let the release workflow build and upload `dist/computer-control-card.js` for HACS users.
+
 - Build output is `dist/computer-control-card.js`; HACS uses the `filename` value in `hacs.json`.
-- Create versioned Git tags/releases for published builds so HACS users can receive update notifications.
+- HACS discovers updates from semantic version tags and GitHub releases.
 - After a HACS update, reload Home Assistant and clear the browser cache if the old frontend bundle is still visible.
 - Manual installs should replace the copied `config/www/computer-control-card.js` file with the new build and then refresh the Home Assistant frontend.
 

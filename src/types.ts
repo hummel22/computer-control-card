@@ -17,6 +17,23 @@ export interface LovelaceCardConfig {
   title?: string;
 }
 
+export type HomeAssistantSelector =
+  | { entity: Record<string, never> }
+  | { text: Record<string, never> }
+  | { select: { options: Array<{ label: string; value: string }> } };
+
+export interface HomeAssistantFormSchema {
+  name: string;
+  label?: string;
+  required?: boolean;
+  selector: HomeAssistantSelector;
+}
+
+export interface LovelaceGridOptions {
+  columns: number;
+  rows: number;
+}
+
 export type ComputerControlActionKey = 'wake' | 'shutdown' | 'outlet_on' | 'outlet_off';
 
 export interface ComputerControlActionConfig {
@@ -66,6 +83,7 @@ export interface LovelaceCard extends HTMLElement {
   hass?: HomeAssistant;
   setConfig(config: LovelaceCardConfig): void;
   getCardSize?(): number;
+  getGridOptions?(): LovelaceGridOptions;
 }
 
 declare global {
@@ -75,6 +93,7 @@ declare global {
       name: string;
       description: string;
       preview?: boolean;
+      documentationURL?: string;
     }>;
   }
 }
