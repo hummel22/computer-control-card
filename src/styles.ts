@@ -11,26 +11,166 @@ export const styles = css`
     padding: 16px;
   }
 
-  .header {
-    display: flex;
+  .compact-shell,
+  .extended-shell {
+    display: grid;
+    gap: 16px;
+  }
+
+  .compact-header,
+  .extended-header,
+  .identity,
+  .header-trailing,
+  .action-pair {
     align-items: center;
-    justify-content: space-between;
+    display: flex;
     gap: 12px;
-    margin-bottom: 16px;
+  }
+
+  .compact-header,
+  .extended-header {
+    justify-content: space-between;
+  }
+
+  .avatar {
+    align-items: center;
+    background: color-mix(in srgb, var(--primary-color) 14%, transparent);
+    border-radius: 16px;
+    color: var(--primary-color);
+    display: inline-flex;
+    height: 44px;
+    justify-content: center;
+    width: 44px;
+  }
+
+  h2,
+  h3,
+  p {
+    margin: 0;
   }
 
   h2 {
     color: var(--primary-text-color);
     font-size: 20px;
-    font-weight: 500;
+    font-weight: 600;
     line-height: 1.2;
-    margin: 0;
+  }
+
+  h3 {
+    color: var(--primary-text-color);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .status,
+  .subtle,
+  .empty,
+  .note,
+  .trend,
+  .warning,
+  .metric span {
+    color: var(--secondary-text-color);
+    font-size: 13px;
   }
 
   .status {
-    color: var(--secondary-text-color);
-    font-size: 14px;
     text-transform: capitalize;
+  }
+
+  .status-pill {
+    background: color-mix(in srgb, var(--primary-color) 16%, var(--card-background-color));
+    border: 1px solid color-mix(in srgb, var(--primary-color) 24%, var(--divider-color));
+    border-radius: 999px;
+    color: var(--primary-text-color);
+    font-size: 12px;
+    padding: 5px 10px;
+    text-transform: capitalize;
+    white-space: nowrap;
+  }
+
+  .signal-row,
+  .metric-row {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .signal {
+    align-items: flex-start;
+    flex-direction: column;
+    min-height: 92px;
+  }
+
+  .signal strong,
+  .metric strong,
+  .status-banner strong {
+    color: var(--primary-text-color);
+    font-size: 16px;
+    text-transform: capitalize;
+  }
+
+  .icon-button {
+    border-radius: 999px;
+    min-height: 38px;
+    padding: 8px;
+    width: 38px;
+  }
+
+  .popover,
+  .status-banner,
+  .metric,
+  section,
+  .note {
+    background: var(--secondary-background-color, #f4f4f4);
+    border: 1px solid var(--divider-color, transparent);
+    border-radius: 18px;
+    padding: 14px;
+  }
+
+  .popover {
+    box-shadow: var(--ha-card-box-shadow, 0 4px 16px rgb(0 0 0 / 14%));
+    display: grid;
+    gap: 12px;
+  }
+
+  .status-banner {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--primary-color) 24%, var(--card-background-color)), var(--secondary-background-color, #f4f4f4));
+    display: grid;
+    gap: 4px;
+  }
+
+  .joined {
+    gap: 0;
+  }
+
+  .joined .metric {
+    border-radius: 0;
+  }
+
+  .joined .metric:first-child {
+    border-bottom-left-radius: 18px;
+    border-top-left-radius: 18px;
+  }
+
+  .joined .metric:last-child {
+    border-bottom-right-radius: 18px;
+    border-top-right-radius: 18px;
+  }
+
+  .metric {
+    display: grid;
+    gap: 6px;
+  }
+
+  section {
+    display: grid;
+    gap: 10px;
+  }
+
+  .warning {
+    color: var(--warning-color, #b26a00);
   }
 
   .actions {
@@ -54,7 +194,7 @@ export const styles = css`
     padding: 8px 12px;
   }
 
-  button:hover {
+  button:hover:not(:disabled) {
     background: var(--primary-color);
     color: var(--text-primary-color, #fff);
   }
@@ -64,8 +204,16 @@ export const styles = css`
     opacity: 0.5;
   }
 
-  .empty {
-    color: var(--secondary-text-color);
-    font-size: 14px;
+  @media (max-width: 420px) {
+    .compact-header,
+    .action-pair {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .signal-row,
+    .metric-row {
+      grid-template-columns: 1fr;
+    }
   }
 `;
