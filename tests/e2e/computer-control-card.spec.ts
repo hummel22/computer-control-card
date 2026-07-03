@@ -155,7 +155,14 @@ test.describe('Computer Control Card demo', () => {
     await signal(page, 'draw').click();
     const drawPanel = card(page, 'compact').locator('.popover');
     await expect(drawPanel).toContainText('System Draw');
-    await expect(drawPanel).toContainText('— kWh');
+    await expect(drawPanel.locator('.metric.unavailable').filter({ hasText: 'Today' })).toHaveText(/Today\s*Unavailable/);
+    await expect(drawPanel.locator('.metric.unavailable').filter({ hasText: 'Month' })).toHaveText(/Month\s*Unavailable/);
+    await expect(drawPanel).not.toContainText('— kWh');
+
+    const extendedMetrics = card(page, 'extended').locator('.metric-row.joined');
+    await expect(extendedMetrics.locator('.metric.unavailable').filter({ hasText: 'Today' })).toHaveText(/Today\s*Unavailable/);
+    await expect(extendedMetrics.locator('.metric.unavailable').filter({ hasText: 'Month' })).toHaveText(/Month\s*Unavailable/);
+    await expect(extendedMetrics).not.toContainText('— kWh');
 
     expect(consoleErrors).toEqual([]);
   });

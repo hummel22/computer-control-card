@@ -8,6 +8,7 @@ import type { ComputerControlActionConfig, ComputerControlCardConfig, ComputerCo
 const CARD_TYPE = 'custom:computer-control-card';
 const DEFAULT_THRESHOLDS = { idleWatts: 10, activeWatts: 40 };
 type PanelKey = 'outlet' | 'pc' | 'draw';
+type MetricValue = { present: true; value: string } | { present: false; value: string };
 
 @customElement('computer-control-card')
 export class ComputerControlCard extends LitElement {
@@ -115,8 +116,8 @@ export class ComputerControlCard extends LitElement {
         </div>
         <div class="metric-row joined">
           ${this._renderMetric('Outlet', this._outletStatus(entity, getEntity(this.hass, this._config?.outlet_entity)))}
-          ${this._renderMetric('Today', this._metric(entity, ['today_kwh', 'energy_today'], '— kWh'))}
-          ${this._renderMetric('Month', this._metric(entity, ['month_kwh', 'energy_month'], '— kWh'))}
+          ${this._renderMetric('Today', this._metricValue(entity, ['today_kwh', 'energy_today']))}
+          ${this._renderMetric('Month', this._metricValue(entity, ['month_kwh', 'energy_month']))}
         </div>
         <section>
           <h3>Machine Actions</h3>
@@ -178,16 +179,17 @@ export class ComputerControlCard extends LitElement {
         <h3>System Draw</h3>
         <div class="metric-row">
           ${this._renderMetric('Now', this._powerMetric(entity, getEntity(this.hass, this._config?.power_entity)))}
-          ${this._renderMetric('Today', this._metric(entity, ['today_kwh', 'energy_today'], '— kWh'))}
-          ${this._renderMetric('Month', this._metric(entity, ['month_kwh', 'energy_month'], '— kWh'))}
+          ${this._renderMetric('Today', this._metricValue(entity, ['today_kwh', 'energy_today']))}
+          ${this._renderMetric('Month', this._metricValue(entity, ['month_kwh', 'energy_month']))}
         </div>
         <div class="trend">${this._metric(entity, ['trend', 'power_trend'], status)}</div>
       </div>
     `;
   }
 
-  private _renderMetric(label: string, value: string) {
-    return html`<div class="metric"><span>${label}</span><strong>${value}</strong></div>`;
+  private _renderMetric(label: string, metric: string | MetricValue) {
+    const normalized = typeof metric === 'string' ? { present: true, value: metric } : metric;
+    return html`<div class=${`metric${normalized.present ? '' : ' unavailable'}`} aria-disabled=${normalized.present ? nothing : 'true'}><span>${label}</span><strong>${normalized.value}</strong></div>`;
   }
 
   private _renderConfirmationDialog() {
@@ -227,9 +229,13 @@ export class ComputerControlCard extends LitElement {
     );
   }
 
-  private _metric(entity: HassEntity | undefined, keys: string[], fallback: string): string {
+  private _metricValue(entity: HassEntity | undefined, keys: string[], fallback = 'Unavailable'): MetricValue {
     const value = keys.map((key) => entity?.attributes[key]).find((item) => item !== undefined && item !== null && item !== '');
-    return value === undefined ? fallback : String(value);
+    return value === undefined ? { present: false, value: fallback } : { present: true, value: String(value) };
+  }
+
+  private _metric(entity: HassEntity | undefined, keys: string[], fallback: string): string {
+    return this._metricValue(entity, keys, fallback).value;
   }
 
   private _outletStatus(entity: HassEntity | undefined, outletEntity: HassEntity | undefined): string {

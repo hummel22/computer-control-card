@@ -164,6 +164,15 @@ export const styles = css`
     gap: 6px;
   }
 
+  .metric.unavailable {
+    background: color-mix(in srgb, var(--secondary-background-color, #f4f4f4) 82%, var(--disabled-text-color, #9b9b9b));
+    opacity: 0.68;
+  }
+
+  .metric.unavailable strong {
+    color: var(--disabled-text-color, var(--secondary-text-color));
+  }
+
   section {
     display: grid;
     gap: 10px;
