@@ -20,6 +20,7 @@ export const buildDefaultActions = (config: ComputerControlCardConfig): Computer
 
   if (config.wol_mac) {
     actions.push({
+      key: 'wake',
       label: 'Wake PC',
       icon: 'mdi:power',
       domain: 'wake_on_lan',
@@ -33,6 +34,7 @@ export const buildDefaultActions = (config: ComputerControlCardConfig): Computer
 
   if (config.shutdown_entity) {
     actions.push({
+      key: 'shutdown',
       label: 'Shutdown',
       icon: 'mdi:power-off',
       domain: 'button',
@@ -46,6 +48,7 @@ export const buildDefaultActions = (config: ComputerControlCardConfig): Computer
     actions.push(
       withDefaults(
         {
+          key: 'outlet_on',
           label: 'Outlet On',
           icon: 'mdi:power-plug',
           domain: 'switch',
@@ -56,6 +59,7 @@ export const buildDefaultActions = (config: ComputerControlCardConfig): Computer
       ),
       withDefaults(
         {
+          key: 'outlet_off',
           label: 'Outlet Off',
           icon: 'mdi:power-plug-off',
           domain: 'switch',

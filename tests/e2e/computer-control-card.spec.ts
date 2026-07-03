@@ -135,6 +135,44 @@ test.describe('Computer Control Card demo', () => {
     expect(consoleErrors).toEqual([]);
   });
 
+
+  test('custom actions are matched by explicit action keys instead of labels', async ({ page }) => {
+    const consoleErrors = expectNoConsoleErrors(page);
+    await gotoDemo(page);
+
+    await configureDashboardCard(page, 'compact', {
+      actions: [
+        {
+          key: 'shutdown',
+          label: 'Graceful stop',
+          icon: 'mdi:power-off',
+          domain: 'button',
+          service: 'press',
+          service_data: { entity_id: shutdownEntity },
+        },
+        {
+          key: 'wake',
+          label: 'Boot workstation',
+          icon: 'mdi:power',
+          domain: 'wake_on_lan',
+          service: 'send_magic_packet',
+          service_data: { mac: wakeMac, broadcast_address: wakeBroadcastAddress },
+        },
+      ],
+    });
+
+    await signal(page, 'pc').click();
+    await expect(actionButton(card(page, 'compact'), 'Boot workstation')).toBeVisible();
+    await expect(actionButton(card(page, 'compact'), 'Graceful stop')).toBeVisible();
+
+    await actionButton(card(page, 'compact'), 'Boot workstation').click();
+    await expectServiceCall(page, 'wake_on_lan.send_magic_packet', {
+      mac: wakeMac,
+      broadcast_address: wakeBroadcastAddress,
+    });
+    expect(consoleErrors).toEqual([]);
+  });
+
   test('disabled and unavailable states are reflected when optional entities/actions are missing', async ({ page }) => {
     const consoleErrors = expectNoConsoleErrors(page);
     await gotoDemo(page);
@@ -145,7 +183,7 @@ test.describe('Computer Control Card demo', () => {
       wol_mac: undefined,
       shutdown_entity: undefined,
       outlet_actions: {
-        turn_off: { confirmation: 'Turn off the outlet?' },
+        turn_off: { key: 'outlet_off', confirmation: 'Turn off the outlet?' },
       },
     });
 

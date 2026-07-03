@@ -17,7 +17,10 @@ export interface LovelaceCardConfig {
   title?: string;
 }
 
+export type ComputerControlActionKey = 'wake' | 'shutdown' | 'outlet_on' | 'outlet_off';
+
 export interface ComputerControlActionConfig {
+  key: ComputerControlActionKey;
   label: string;
   icon?: string;
   domain: string;

@@ -114,7 +114,42 @@ outlet_actions:
     confirmation: This immediately removes power from Desktop PC. Continue?
 ```
 
-For fully custom controls, provide `actions` with explicit Home Assistant `domain`, `service`, and `service_data`. Custom `actions` replace the automatically generated first-class actions.
+For fully custom controls, provide `actions` with an explicit `key` plus Home Assistant `domain`, `service`, and `service_data`. The built-in controls use `key` to deterministically map configured actions to the Wake PC, Shutdown, Outlet On, and Outlet Off buttons. Custom `actions` replace the automatically generated first-class actions.
+
+```yaml
+actions:
+  - key: wake
+    label: Wake PC
+    icon: mdi:power
+    domain: wake_on_lan
+    service: send_magic_packet
+    service_data:
+      mac: AA:BB:CC:DD:EE:FF
+      broadcast_address: 192.168.1.255
+  - key: shutdown
+    label: Shutdown
+    icon: mdi:power-off
+    domain: button
+    service: press
+    service_data:
+      entity_id: button.desktop_pc_shutdown
+    confirmation: Shut down Desktop PC?
+  - key: outlet_on
+    label: Outlet On
+    icon: mdi:power-plug
+    domain: switch
+    service: turn_on
+    service_data:
+      entity_id: switch.desktop_pc_outlet
+  - key: outlet_off
+    label: Outlet Off
+    icon: mdi:power-plug-off
+    domain: switch
+    service: turn_off
+    service_data:
+      entity_id: switch.desktop_pc_outlet
+    confirmation: This immediately removes power from Desktop PC. Continue?
+```
 
 Generated first-class actions include only the service data required by that action. For custom `actions`, provide any target entity in `service_data.entity_id`. For services that do not accept `entity_id`, route the operation through a Home Assistant script or button helper and point the card action at that entity instead.
 
