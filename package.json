@@ -1,6 +1,6 @@
 {
   "name": "computer-control-card",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Frontend-only Home Assistant Lovelace card for controlling computers remotely.",
   "type": "module",
   "main": "dist/computer-control-card.js",
