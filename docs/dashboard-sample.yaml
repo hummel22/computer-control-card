@@ -1,0 +1,57 @@
+# Sample Lovelace dashboard fragment for optional Home Assistant manual testing.
+#
+# Primary development and test coverage should continue to use the standalone
+# mocked Vite demo (`npm run demo`, `npm test`, and Playwright tests). This
+# sample is only for disposable Home Assistant development instances.
+#
+# Development resource option, while `npm run dev` is running and port 5173 is
+# forwarded to your browser:
+#
+# resources:
+#   - url: http://localhost:5173/src/computer-control-card.ts
+#     type: module
+#
+# Built resource option, after `npm run build`, when this repository is mounted
+# at /config/www/workspace in Home Assistant:
+#
+# resources:
+#   - url: /local/workspace/dist/computer-control-card.js
+#     type: module
+
+title: Computer Control Card Dev
+views:
+  - title: Computer
+    path: computer
+    cards:
+      - type: custom:computer-control-card
+        title: Demo computer
+        entity: sensor.demo_pc_summary
+        name: Demo PC
+        variant: compact
+        actions:
+          - label: Wake PC
+            icon: mdi:rocket-launch
+            domain: wake_on_lan
+            service: send_magic_packet
+            service_data:
+              mac: "00:00:00:00:00:00"
+          - label: Shutdown PC
+            icon: mdi:power-off
+            domain: button
+            service: press
+            service_data:
+              entity_id: button.demo_pc_shutdown
+            confirmation: Shut down the demo PC?
+          - label: Outlet On
+            icon: mdi:power-plug
+            domain: switch
+            service: turn_on
+            service_data:
+              entity_id: switch.demo_pc_outlet
+          - label: Outlet Off
+            icon: mdi:power-plug-off
+            domain: switch
+            service: turn_off
+            service_data:
+              entity_id: switch.demo_pc_outlet
+            confirmation: Hard power off the demo PC?

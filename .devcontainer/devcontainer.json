@@ -1,0 +1,26 @@
+{
+  "name": "Computer Control Card",
+  "image": "ghcr.io/home-assistant/devcontainer:latest",
+  "workspaceFolder": "/config/www/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/config/www/workspace,type=bind,consistency=cached",
+  "forwardPorts": [8123, 5173],
+  "portsAttributes": {
+    "8123": {
+      "label": "Home Assistant",
+      "onAutoForward": "notify"
+    },
+    "5173": {
+      "label": "Vite dev server",
+      "onAutoForward": "notify"
+    }
+  },
+  "postCreateCommand": "corepack enable || true; npm ci",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  }
+}
