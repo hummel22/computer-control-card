@@ -31,6 +31,7 @@ export interface ComputerControlCardConfig extends LovelaceCardConfig {
   title?: string;
   entity?: string;
   name?: string;
+  variant?: 'compact' | 'extended';
   actions?: ComputerControlActionConfig[];
 }
 
