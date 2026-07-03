@@ -28,10 +28,19 @@ export interface ComputerControlActionConfig {
 
 export type ComputerControlConfirmationHandler = (message: string, action: ComputerControlActionConfig) => boolean | Promise<boolean>;
 
+export interface ComputerControlStateThresholds {
+  idleWatts?: number;
+  activeWatts?: number;
+}
+
 export interface ComputerControlCardConfig extends LovelaceCardConfig {
   type: 'custom:computer-control-card';
   title?: string;
   entity?: string;
+  outlet_entity?: string;
+  status_entity?: string;
+  power_entity?: string;
+  thresholds?: ComputerControlStateThresholds;
   name?: string;
   variant?: 'compact' | 'extended';
   actions?: ComputerControlActionConfig[];

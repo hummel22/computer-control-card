@@ -1,5 +1,5 @@
 import '../src/computer-control-card';
-import { fixtures, type FixtureKey, PRIMARY_ENTITY, OUTLET_ENTITY } from './fixtures';
+import { fixtures, type FixtureKey, PRIMARY_ENTITY, OUTLET_ENTITY, STATUS_ENTITY, POWER_ENTITY } from './fixtures';
 import { createMockHass, serviceCalls, type DemoHomeAssistant, type ServiceCallLogEntry } from './mock-hass';
 import './styles.css';
 import type { ComputerControlCardConfig, LovelaceCard } from '../src/types';
@@ -45,6 +45,10 @@ const baseConfig = (variant: 'compact' | 'extended'): ComputerControlCardConfig 
   type: 'custom:computer-control-card',
   title: `${variant === 'compact' ? 'Compact' : 'Extended'} Computer Control`,
   entity: PRIMARY_ENTITY,
+  outlet_entity: OUTLET_ENTITY,
+  status_entity: STATUS_ENTITY,
+  power_entity: POWER_ENTITY,
+  thresholds: { idleWatts: 10, activeWatts: 40 },
   name: 'Studio Workstation',
   variant,
   actions,
@@ -73,7 +77,7 @@ const renderCards = () => {
 
 const applyFixture = (fixture: FixtureKey) => {
   hass.setStates(fixtures[fixture]);
-  cards.forEach((card) => { card.hass = hass; });
+  cards.forEach((card) => { card.hass = { ...hass }; });
   document.body.dataset.fixture = fixture;
 };
 

@@ -13,9 +13,9 @@ export interface ComputerStateThresholds {
 }
 
 export interface DeriveComputerStateInput {
-  outletState?: string | null;
-  statusState?: string | null;
-  powerWatts?: number | string | null;
+  outletState?: string | null | undefined;
+  statusState?: string | null | undefined;
+  powerWatts?: number | string | null | undefined;
   thresholds: ComputerStateThresholds;
 }
 
