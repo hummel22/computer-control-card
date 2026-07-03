@@ -43,7 +43,7 @@ const baseConfig = (variant: 'compact' | 'extended'): ComputerControlCardConfig 
   shutdown_entity: 'button.demo_pc_shutdown',
   outlet_entity: OUTLET_ENTITY,
   outlet_actions: {
-    turn_off: { confirmation: 'Turn off the outlet?' },
+    turn_off: { key: 'outlet_off', confirmation: 'Turn off the outlet?' },
   },
   status_entity: STATUS_ENTITY,
   power_entity: POWER_ENTITY,

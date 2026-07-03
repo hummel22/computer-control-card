@@ -3,7 +3,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { buildDefaultActions } from './actions';
 import { deriveComputerState, getDisplayName, getEntity } from './state';
 import { styles } from './styles';
-import type { ComputerControlActionConfig, ComputerControlCardConfig, ComputerControlConfirmationHandler, HassEntity, HomeAssistant, LovelaceCardConfig } from './types';
+import type { ComputerControlActionConfig, ComputerControlActionKey, ComputerControlCardConfig, ComputerControlConfirmationHandler, HassEntity, HomeAssistant, LovelaceCardConfig } from './types';
 
 const CARD_TYPE = 'custom:computer-control-card';
 const DEFAULT_THRESHOLDS = { idleWatts: 10, activeWatts: 40 };
@@ -128,8 +128,8 @@ export class ComputerControlCard extends LitElement {
         <section>
           <h3>Power Controls</h3>
           <div class="action-pair">
-            ${this._renderActionButton('Outlet On', 'mdi:power-plug', this._findAction('outlet on', 'on'))}
-            ${this._renderActionButton('Outlet Off', 'mdi:power-plug-off', this._findAction('outlet off', 'off'))}
+            ${this._renderActionButton('Outlet On', 'mdi:power-plug', this._findAction('outlet_on'))}
+            ${this._renderActionButton('Outlet Off', 'mdi:power-plug-off', this._findAction('outlet_off'))}
           </div>
         </section>
         <div class="note">Protected actions require confirmation before they run.</div>
@@ -153,8 +153,8 @@ export class ComputerControlCard extends LitElement {
           <h3>Power Outlet</h3>
           <p>Current outlet status: <strong>${this._outletStatus(entity, getEntity(this.hass, this._config?.outlet_entity))}</strong></p>
           <div class="action-pair">
-            ${this._renderActionButton('Outlet On', 'mdi:power-plug', this._findAction('outlet on', 'on'))}
-            ${this._renderActionButton('Outlet Off', 'mdi:power-plug-off', this._findAction('outlet off', 'off'))}
+            ${this._renderActionButton('Outlet On', 'mdi:power-plug', this._findAction('outlet_on'))}
+            ${this._renderActionButton('Outlet Off', 'mdi:power-plug-off', this._findAction('outlet_off'))}
           </div>
           <div class="warning">Hard power cuts can cause data loss. Use only when graceful controls are unavailable.</div>
         </div>
@@ -219,8 +219,19 @@ export class ComputerControlCard extends LitElement {
     `;
   }
 
-  private _findAction(...terms: string[]): ComputerControlActionConfig | undefined {
+  private _findAction(key: ComputerControlActionKey): ComputerControlActionConfig | undefined {
     const actions = this._config?.actions ?? [];
+    return actions.find((action) => action.key === key) ?? this._findLegacyAction(key, actions);
+  }
+
+  private _findLegacyAction(key: ComputerControlActionKey, actions: ComputerControlActionConfig[]): ComputerControlActionConfig | undefined {
+    const legacyTerms: Record<ComputerControlActionKey, string[]> = {
+      wake: ['wake'],
+      shutdown: ['shutdown'],
+      outlet_on: ['outlet on', 'on'],
+      outlet_off: ['outlet off', 'off'],
+    };
+    const terms = legacyTerms[key];
     return (
       actions.find((action) => terms.every((term) => action.label.toLowerCase().includes(term))) ??
       actions.find((action) => terms.some((term) => action.label.toLowerCase().includes(term)))
