@@ -17,9 +17,9 @@
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
     "test": "tsx --test tests/unit/*.test.ts",
-    "test:e2e": "echo \"No e2e tests configured yet\"",
-    "test:visual": "echo \"No visual tests configured yet\"",
-    "screenshots": "echo \"No screenshot workflow configured yet\""
+    "test:e2e": "playwright test",
+    "test:visual": "playwright test --grep @screenshots",
+    "screenshots": "playwright test --grep @screenshots"
   },
   "keywords": [
     "home-assistant",
@@ -33,6 +33,7 @@
     "lit": "^3.3.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@types/node": "^24.0.10",
     "tsx": "^4.23.0",
     "typescript": "^5.8.3",
