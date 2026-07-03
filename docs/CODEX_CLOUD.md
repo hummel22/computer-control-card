@@ -40,7 +40,7 @@ Screenshot tests write rendered card images to:
 artifacts/screenshots/
 ```
 
-Open or download the PNG files in that directory to inspect the compact card, extended card, and popover states. Playwright failure artifacts and traces are written to:
+Open or download the PNG files in that directory to inspect the compact card and extended card for every fixture state, plus the named compact popover states. Playwright failure artifacts and traces are written to:
 
 ```text
 test-results/
