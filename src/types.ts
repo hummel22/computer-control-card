@@ -52,6 +52,9 @@ export interface ComputerControlCardConfig extends LovelaceCardConfig {
   outlet_actions?: ComputerControlOutletActionsConfig;
   status_entity?: string;
   power_entity?: string;
+  energy_today_entity?: string;
+  energy_month_entity?: string;
+  energy_total_entity?: string;
   thresholds?: ComputerControlStateThresholds;
   name?: string;
   variant?: 'compact' | 'extended';

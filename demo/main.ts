@@ -1,5 +1,5 @@
 import '../src/computer-control-card';
-import { fixtures, type FixtureKey, PRIMARY_ENTITY, OUTLET_ENTITY, STATUS_ENTITY, POWER_ENTITY } from './fixtures';
+import { fixtures, type FixtureKey, PRIMARY_ENTITY, OUTLET_ENTITY, STATUS_ENTITY, POWER_ENTITY, ENERGY_TODAY_ENTITY, ENERGY_MONTH_ENTITY } from './fixtures';
 import { createMockHass, serviceCalls, type DemoHomeAssistant, type ServiceCallLogEntry } from './mock-hass';
 import './styles.css';
 import type { ComputerControlCardConfig, LovelaceCard } from '../src/types';
@@ -43,10 +43,13 @@ const baseConfig = (variant: 'compact' | 'extended'): ComputerControlCardConfig 
   shutdown_entity: 'button.demo_pc_shutdown',
   outlet_entity: OUTLET_ENTITY,
   outlet_actions: {
+    turn_on: { key: 'outlet_on', confirmation: 'Turn on the outlet?' },
     turn_off: { key: 'outlet_off', confirmation: 'Turn off the outlet?' },
   },
   status_entity: STATUS_ENTITY,
   power_entity: POWER_ENTITY,
+  energy_today_entity: ENERGY_TODAY_ENTITY,
+  energy_month_entity: ENERGY_MONTH_ENTITY,
   thresholds: { idleWatts: 10, activeWatts: 40 },
   name: 'Studio Workstation',
   variant,
