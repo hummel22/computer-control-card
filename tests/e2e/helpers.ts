@@ -69,7 +69,7 @@ export const expectServiceCall = async (page: Page, service: string, expectedPay
 export const configureDashboardCard = async (
   page: Page,
   variant: CardVariant,
-  actions: Array<Record<string, unknown>>,
+  configOverrides: Record<string, unknown>,
 ): Promise<void> => {
   await page.locator(`[data-card-host="dashboard-medium"] computer-control-card[data-variant="${variant}"]`).evaluate((element, payload) => {
     const cardElement = element as HTMLElement & {
@@ -82,12 +82,15 @@ export const configureDashboardCard = async (
       entity: 'sensor.demo_pc_summary',
       outlet_entity: 'switch.demo_pc_outlet',
       status_entity: 'binary_sensor.demo_pc_status',
+      wol_mac: payload.wakeMac,
+      broadcast_address: payload.wakeBroadcastAddress,
+      shutdown_entity: payload.shutdownEntity,
       power_entity: 'sensor.demo_pc_power',
       thresholds: { idleWatts: 10, activeWatts: 40 },
       name: 'Studio Workstation',
       variant: payload.variant,
-      actions: payload.actions,
+      ...payload.configOverrides,
     });
     cardElement.hass = cardElement.hass;
-  }, { actions, variant });
+  }, { configOverrides, shutdownEntity, variant, wakeBroadcastAddress, wakeMac });
 };

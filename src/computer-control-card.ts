@@ -1,6 +1,6 @@
 import { LitElement, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { DEFAULT_ACTIONS } from './actions';
+import { buildDefaultActions } from './actions';
 import { deriveComputerState, getDisplayName, getEntity } from './state';
 import { styles } from './styles';
 import type { ComputerControlActionConfig, ComputerControlCardConfig, ComputerControlConfirmationHandler, HassEntity, HomeAssistant, LovelaceCardConfig } from './types';
@@ -33,7 +33,7 @@ export class ComputerControlCard extends LitElement {
     this._config = {
       ...config,
       variant: (config as ComputerControlCardConfig).variant ?? 'compact',
-      actions: (config as ComputerControlCardConfig).actions ?? DEFAULT_ACTIONS,
+      actions: (config as ComputerControlCardConfig).actions ?? buildDefaultActions(config as ComputerControlCardConfig),
     } as ComputerControlCardConfig;
   }
 
@@ -293,7 +293,6 @@ export class ComputerControlCard extends LitElement {
   private async _callActionService(action: ComputerControlActionConfig): Promise<void> {
     if (!this.hass) return;
     const serviceData = {
-      ...(this._config?.entity ? { entity_id: this._config.entity } : {}),
       ...(action.service_data ?? {}),
     };
     await this.hass.callService(action.domain, action.service, serviceData);

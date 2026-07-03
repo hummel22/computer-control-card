@@ -33,11 +33,20 @@ export interface ComputerControlStateThresholds {
   activeWatts?: number;
 }
 
+export interface ComputerControlOutletActionsConfig {
+  turn_on?: Partial<ComputerControlActionConfig>;
+  turn_off?: Partial<ComputerControlActionConfig>;
+}
+
 export interface ComputerControlCardConfig extends LovelaceCardConfig {
   type: 'custom:computer-control-card';
   title?: string;
   entity?: string;
+  wol_mac?: string;
+  broadcast_address?: string;
+  shutdown_entity?: string;
   outlet_entity?: string;
+  outlet_actions?: ComputerControlOutletActionsConfig;
   status_entity?: string;
   power_entity?: string;
   thresholds?: ComputerControlStateThresholds;

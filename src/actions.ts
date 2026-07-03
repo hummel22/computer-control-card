@@ -1,24 +1,72 @@
-import type { ComputerControlActionConfig } from './types';
+import type { ComputerControlActionConfig, ComputerControlCardConfig } from './types';
 
-export const DEFAULT_ACTIONS: ComputerControlActionConfig[] = [
-  {
-    label: 'Wake',
-    icon: 'mdi:power',
-    domain: 'button',
-    service: 'press',
+const SHUTDOWN_CONFIRMATION = 'Shut down this computer?';
+const OUTLET_OFF_CONFIRMATION = 'Turn off the outlet?';
+
+const withDefaults = (
+  defaults: ComputerControlActionConfig,
+  override: Partial<ComputerControlActionConfig> | undefined,
+): ComputerControlActionConfig => ({
+  ...defaults,
+  ...override,
+  service_data: {
+    ...(defaults.service_data ?? {}),
+    ...(override?.service_data ?? {}),
   },
-  {
-    label: 'Shutdown',
-    icon: 'mdi:power-off',
-    domain: 'button',
-    service: 'press',
-    confirmation: 'Shut down this computer?',
-  },
-  {
-    label: 'Restart',
-    icon: 'mdi:restart',
-    domain: 'button',
-    service: 'press',
-    confirmation: 'Restart this computer?',
-  },
-];
+});
+
+export const buildDefaultActions = (config: ComputerControlCardConfig): ComputerControlActionConfig[] => {
+  const actions: ComputerControlActionConfig[] = [];
+
+  if (config.wol_mac) {
+    actions.push({
+      label: 'Wake PC',
+      icon: 'mdi:power',
+      domain: 'wake_on_lan',
+      service: 'send_magic_packet',
+      service_data: {
+        mac: config.wol_mac,
+        ...(config.broadcast_address ? { broadcast_address: config.broadcast_address } : {}),
+      },
+    });
+  }
+
+  if (config.shutdown_entity) {
+    actions.push({
+      label: 'Shutdown',
+      icon: 'mdi:power-off',
+      domain: 'button',
+      service: 'press',
+      service_data: { entity_id: config.shutdown_entity },
+      confirmation: SHUTDOWN_CONFIRMATION,
+    });
+  }
+
+  if (config.outlet_entity) {
+    actions.push(
+      withDefaults(
+        {
+          label: 'Outlet On',
+          icon: 'mdi:power-plug',
+          domain: 'switch',
+          service: 'turn_on',
+          service_data: { entity_id: config.outlet_entity },
+        },
+        config.outlet_actions?.turn_on,
+      ),
+      withDefaults(
+        {
+          label: 'Outlet Off',
+          icon: 'mdi:power-plug-off',
+          domain: 'switch',
+          service: 'turn_off',
+          service_data: { entity_id: config.outlet_entity },
+          confirmation: OUTLET_OFF_CONFIRMATION,
+        },
+        config.outlet_actions?.turn_off,
+      ),
+    );
+  }
+
+  return actions;
+};
