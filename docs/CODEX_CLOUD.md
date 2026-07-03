@@ -82,16 +82,55 @@ For automated Playwright runs, the test configuration starts the same standalone
 
 ## Optional Home Assistant devcontainer path
 
-A real Home Assistant instance is not required for tests and should not be required by new tests. If you want to manually validate the card in a Home Assistant development environment, you may optionally use a Home Assistant devcontainer or local Home Assistant frontend setup and load the built card from `dist/computer-control-card.js` as a custom Lovelace resource.
+The standalone mocked demo harness is the primary development and test path for this repository. A real Home Assistant instance is not required for tests and should not be required by new tests. Use the devcontainer path only as a secondary manual smoke-test option when you specifically need to see the card inside a disposable Home Assistant dashboard.
 
-Guidelines for this optional path:
+This repository includes `.devcontainer/devcontainer.json` for that optional workflow. It follows common custom-card development patterns by:
 
-1. Run `npm run build` in this repository.
-2. Copy or serve `dist/computer-control-card.js` where your development Home Assistant instance can load it.
-3. Add it as a Lovelace JavaScript module resource in the development instance.
-4. Use fake/demo entities or a disposable development setup only.
+- using a Home Assistant development container image;
+- mounting this repository at `/config/www/workspace`, which makes built files available to Home Assistant under `/local/workspace/...`;
+- forwarding Home Assistant on port `8123`;
+- forwarding the Vite dev server on port `5173`;
+- installing Node dependencies with `npm ci` after the container is created.
 
-Do not use secrets, personal production Home Assistant instances, or real network devices for validation.
+### Start the optional devcontainer workflow
+
+1. Open the repository in VS Code or another tool that supports Dev Containers.
+2. Reopen the repository in the devcontainer. The repository workspace will be mounted at `/config/www/workspace`.
+3. Start the Vite development server when you want to load the card source directly:
+
+   ```sh
+   npm run dev
+   ```
+
+4. Start or open your disposable Home Assistant development instance on the forwarded `8123` port if your devcontainer environment does not start it automatically.
+
+### Register the card as a Lovelace resource
+
+During active development, prefer the Vite-served module so browser refreshes pick up source changes without rebuilding:
+
+```yaml
+url: http://localhost:5173/src/computer-control-card.ts
+type: module
+```
+
+If your browser reaches forwarded ports through a different host name, replace `localhost` with that host name. The URL is loaded by the browser, not by the Home Assistant backend.
+
+For a built-file smoke test, run:
+
+```sh
+npm run build
+```
+
+Then register the built module from the repository mount exposed through Home Assistant's `/local` path:
+
+```yaml
+url: /local/workspace/dist/computer-control-card.js
+type: module
+```
+
+A sample Lovelace dashboard fragment is available at `docs/dashboard-sample.yaml`. It includes both resource options as comments and a sample `custom:computer-control-card` configuration using demo-style placeholder entities.
+
+Keep this path optional and disposable: do not use secrets, personal production Home Assistant instances, or real network devices for validation. Continue to use `npm run demo`, unit tests, and Playwright tests for normal development coverage.
 
 ## Troubleshooting
 
