@@ -51,6 +51,9 @@ export class ComputerControlCard extends LitElement {
     const outletEntity = getEntity(this.hass, this._config.outlet_entity);
     const statusEntity = getEntity(this.hass, this._config.status_entity);
     const powerEntity = getEntity(this.hass, this._config.power_entity);
+    const energyTodayEntity = getEntity(this.hass, this._config.energy_today_entity);
+    const energyMonthEntity = getEntity(this.hass, this._config.energy_month_entity);
+    const energyTotalEntity = getEntity(this.hass, this._config.energy_total_entity);
     const displayName = getDisplayName(this._config, entity);
     const status = this._statusLabel(deriveComputerState({
       outletState: outletEntity?.state,
@@ -63,13 +66,22 @@ export class ComputerControlCard extends LitElement {
     return html`
       <ha-card header=${this._config.title ?? nothing} class=${variant}>
         ${variant === 'extended'
-          ? this._renderExtended(entity, displayName, status)
-          : this._renderCompact(entity, outletEntity, powerEntity, displayName, status)}
+          ? this._renderExtended(entity, energyTodayEntity, energyMonthEntity, energyTotalEntity, displayName, status)
+          : this._renderCompact(entity, outletEntity, powerEntity, energyTodayEntity, energyMonthEntity, energyTotalEntity, displayName, status)}
       </ha-card>
     `;
   }
 
-  private _renderCompact(entity: HassEntity | undefined, outletEntity: HassEntity | undefined, powerEntity: HassEntity | undefined, displayName: string, status: string) {
+  private _renderCompact(
+    entity: HassEntity | undefined,
+    outletEntity: HassEntity | undefined,
+    powerEntity: HassEntity | undefined,
+    energyTodayEntity: HassEntity | undefined,
+    energyMonthEntity: HassEntity | undefined,
+    energyTotalEntity: HassEntity | undefined,
+    displayName: string,
+    status: string,
+  ) {
     return html`
       <div class="compact-shell">
         <div class="compact-header">
@@ -92,13 +104,20 @@ export class ComputerControlCard extends LitElement {
           ${this._renderSignal('pc', 'PC Status', status, 'mdi:desktop-tower')}
           ${this._renderSignal('draw', 'System Draw', this._powerMetric(entity, powerEntity), 'mdi:flash')}
         </div>
-        ${this._activePanel ? this._renderPanel(this._activePanel, entity, status) : nothing}
+        ${this._activePanel ? this._renderPanel(this._activePanel, entity, energyTodayEntity, energyMonthEntity, energyTotalEntity, status) : nothing}
         ${this._renderConfirmationDialog()}
       </div>
     `;
   }
 
-  private _renderExtended(entity: HassEntity | undefined, displayName: string, status: string) {
+  private _renderExtended(
+    entity: HassEntity | undefined,
+    energyTodayEntity: HassEntity | undefined,
+    energyMonthEntity: HassEntity | undefined,
+    energyTotalEntity: HassEntity | undefined,
+    displayName: string,
+    status: string,
+  ) {
     return html`
       <div class="extended-shell">
         <div class="extended-header">
@@ -116,8 +135,9 @@ export class ComputerControlCard extends LitElement {
         </div>
         <div class="metric-row joined">
           ${this._renderMetric('Outlet', this._outletStatus(entity, getEntity(this.hass, this._config?.outlet_entity)))}
-          ${this._renderMetric('Today', this._metricValue(entity, ['today_kwh', 'energy_today']))}
-          ${this._renderMetric('Month', this._metricValue(entity, ['month_kwh', 'energy_month']))}
+          ${this._renderMetric('Today', this._entityMetricValue(energyTodayEntity, entity, ['today_kwh', 'energy_today']))}
+          ${this._renderMetric('Month', this._entityMetricValue(energyMonthEntity, entity, ['month_kwh', 'energy_month']))}
+          ${energyTotalEntity ? this._renderMetric('Total', this._entityMetricValue(energyTotalEntity, entity, ['total_kwh', 'energy_total'])) : nothing}
         </div>
         <section>
           <h3>Machine Actions</h3>
@@ -147,7 +167,14 @@ export class ComputerControlCard extends LitElement {
     </button>`;
   }
 
-  private _renderPanel(key: PanelKey, entity: HassEntity | undefined, status: string) {
+  private _renderPanel(
+    key: PanelKey,
+    entity: HassEntity | undefined,
+    energyTodayEntity: HassEntity | undefined,
+    energyMonthEntity: HassEntity | undefined,
+    energyTotalEntity: HassEntity | undefined,
+    status: string,
+  ) {
     if (key === 'outlet') {
       return html`
         <div class="popover">
@@ -179,8 +206,9 @@ export class ComputerControlCard extends LitElement {
         <h3>System Draw</h3>
         <div class="metric-row">
           ${this._renderMetric('Now', this._powerMetric(entity, getEntity(this.hass, this._config?.power_entity)))}
-          ${this._renderMetric('Today', this._metricValue(entity, ['today_kwh', 'energy_today']))}
-          ${this._renderMetric('Month', this._metricValue(entity, ['month_kwh', 'energy_month']))}
+          ${this._renderMetric('Today', this._entityMetricValue(energyTodayEntity, entity, ['today_kwh', 'energy_today']))}
+          ${this._renderMetric('Month', this._entityMetricValue(energyMonthEntity, entity, ['month_kwh', 'energy_month']))}
+          ${energyTotalEntity ? this._renderMetric('Total', this._entityMetricValue(energyTotalEntity, entity, ['total_kwh', 'energy_total'])) : nothing}
         </div>
         <div class="trend">${this._metric(entity, ['trend', 'power_trend'], status)}</div>
       </div>
@@ -243,6 +271,15 @@ export class ComputerControlCard extends LitElement {
   private _metricValue(entity: HassEntity | undefined, keys: string[], fallback = 'Unavailable'): MetricValue {
     const value = keys.map((key) => entity?.attributes[key]).find((item) => item !== undefined && item !== null && item !== '');
     return value === undefined ? { present: false, value: fallback } : { present: true, value: String(value) };
+  }
+
+  private _entityMetricValue(metricEntity: HassEntity | undefined, fallbackEntity: HassEntity | undefined, fallbackKeys: string[], fallback = 'Unavailable'): MetricValue {
+    if (metricEntity && metricEntity.state !== 'unavailable' && metricEntity.state !== 'unknown') {
+      const unit = metricEntity.attributes.unit_of_measurement;
+      return { present: true, value: `${metricEntity.state}${typeof unit === 'string' ? ` ${unit}` : ''}` };
+    }
+
+    return this._metricValue(fallbackEntity, fallbackKeys, fallback);
   }
 
   private _metric(entity: HassEntity | undefined, keys: string[], fallback: string): string {

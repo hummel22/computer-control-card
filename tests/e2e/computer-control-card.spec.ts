@@ -5,6 +5,8 @@ import {
   card,
   configureDashboardCard,
   expectNoConsoleErrors,
+  energyMonthEntity,
+  energyTodayEntity,
   expectServiceCall,
   fixtureStates,
   gotoDemo,
@@ -119,6 +121,22 @@ test.describe('Computer Control Card demo', () => {
     expect(consoleErrors).toEqual([]);
   });
 
+  test('Outlet On requires confirmation, then calls the configured outlet-on action', async ({ page }) => {
+    const consoleErrors = expectNoConsoleErrors(page);
+    await gotoDemo(page);
+    await signal(page, 'outlet').click();
+
+    await actionButton(card(page, 'compact'), 'Outlet On').click();
+    await expect(card(page, 'compact').locator('.confirm-dialog')).toBeVisible();
+    await expect(page.locator('[data-service-call="switch.turn_on"]')).toHaveCount(0);
+    await acceptConfirmation(card(page, 'compact')).click();
+
+    await expectServiceCall(page, 'switch.turn_on', {
+      entity_id: outletEntity,
+    });
+    expect(consoleErrors).toEqual([]);
+  });
+
   test('Outlet Off requires confirmation, then calls the configured outlet-off action', async ({ page }) => {
     const consoleErrors = expectNoConsoleErrors(page);
     await gotoDemo(page);
@@ -135,6 +153,26 @@ test.describe('Computer Control Card demo', () => {
     expect(consoleErrors).toEqual([]);
   });
 
+  test('separate energy entities populate today and month consumption metrics', async ({ page }) => {
+    const consoleErrors = expectNoConsoleErrors(page);
+    await gotoDemo(page);
+
+    await configureDashboardCard(page, 'extended', {
+      energy_today_entity: energyTodayEntity,
+      energy_month_entity: energyMonthEntity,
+    });
+
+    const metrics = card(page, 'extended').locator('.metric-row.joined');
+    await expect(metrics.locator('.metric').filter({ hasText: 'Today' })).toHaveText(/Today\s*2\.8 kWh/);
+    await expect(metrics.locator('.metric').filter({ hasText: 'Month' })).toHaveText(/Month\s*84\.6 kWh/);
+
+    await signal(page, 'draw').click();
+    const drawPanel = card(page, 'compact').locator('.popover');
+    await expect(drawPanel.locator('.metric').filter({ hasText: 'Today' })).toHaveText(/Today\s*2\.8 kWh/);
+    await expect(drawPanel.locator('.metric').filter({ hasText: 'Month' })).toHaveText(/Month\s*84\.6 kWh/);
+
+    expect(consoleErrors).toEqual([]);
+  });
 
   test('custom actions are matched by explicit action keys instead of labels', async ({ page }) => {
     const consoleErrors = expectNoConsoleErrors(page);

@@ -1,6 +1,7 @@
 import type { ComputerControlActionConfig, ComputerControlCardConfig } from './types';
 
 const SHUTDOWN_CONFIRMATION = 'Shut down this computer?';
+const OUTLET_ON_CONFIRMATION = 'Turn on the outlet?';
 const OUTLET_OFF_CONFIRMATION = 'Turn off the outlet?';
 
 const withDefaults = (
@@ -54,6 +55,7 @@ export const buildDefaultActions = (config: ComputerControlCardConfig): Computer
           domain: 'switch',
           service: 'turn_on',
           service_data: { entity_id: config.outlet_entity },
+          confirmation: OUTLET_ON_CONFIRMATION,
         },
         config.outlet_actions?.turn_on,
       ),

@@ -22,6 +22,8 @@ export const shutdownEntity = 'button.demo_pc_shutdown';
 export const outletEntity = 'switch.demo_pc_outlet';
 export const statusEntity = 'binary_sensor.demo_pc_status';
 export const powerEntity = 'sensor.demo_pc_power';
+export const energyTodayEntity = 'sensor.demo_pc_energy_today';
+export const energyMonthEntity = 'sensor.demo_pc_energy_month';
 
 export const card = (page: Page, variant: CardVariant): Locator =>
   page.locator(`[data-card-host="dashboard-medium"] computer-control-card[data-variant="${variant}"]`);
@@ -86,6 +88,8 @@ export const configureDashboardCard = async (
       broadcast_address: payload.wakeBroadcastAddress,
       shutdown_entity: payload.shutdownEntity,
       power_entity: 'sensor.demo_pc_power',
+      energy_today_entity: 'sensor.demo_pc_energy_today',
+      energy_month_entity: 'sensor.demo_pc_energy_month',
       thresholds: { idleWatts: 10, activeWatts: 40 },
       name: 'Studio Workstation',
       variant: payload.variant,

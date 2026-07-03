@@ -247,8 +247,8 @@ let w = class extends HTMLElement {
   }
 };
 w.elementStyles = [], w.shadowRootOptions = { mode: "open" }, w[C("elementProperties")] = /* @__PURE__ */ new Map(), w[C("finalized")] = /* @__PURE__ */ new Map(), St?.({ ReactiveElement: w }), (D.reactiveElementVersions ??= []).push("2.1.2");
-const I = globalThis, G = (e) => e, R = I.trustedTypes, Q = R ? R.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, dt = "$lit$", m = `lit$${Math.random().toFixed(9).slice(2)}$`, ht = "?" + m, Ct = `<${ht}>`, y = document, P = () => y.createComment(""), O = (e) => e === null || typeof e != "object" && typeof e != "function", V = Array.isArray, Et = (e) => V(e) || typeof e?.[Symbol.iterator] == "function", L = `[ 	
-\f\r]`, S = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, X = /-->/g, tt = />/g, v = RegExp(`>|${L}(?:([^\\s"'>=/]+)(${L}*=${L}*(?:[^ 	
+const I = globalThis, G = (e) => e, R = I.trustedTypes, Q = R ? R.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, dt = "$lit$", v = `lit$${Math.random().toFixed(9).slice(2)}$`, ht = "?" + v, Ct = `<${ht}>`, y = document, P = () => y.createComment(""), O = (e) => e === null || typeof e != "object" && typeof e != "function", V = Array.isArray, Et = (e) => V(e) || typeof e?.[Symbol.iterator] == "function", z = `[ 	
+\f\r]`, S = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, X = /-->/g, tt = />/g, $ = RegExp(`>|${z}(?:([^\\s"'>=/]+)(${z}*=${z}*(?:[^ 	
 \f\r"'\`<>=]|("|')|))|$)`, "g"), et = /'/g, it = /"/g, ut = /^(?:script|style|textarea|title)$/i, Pt = (e) => (t, ...i) => ({ _$litType$: e, strings: t, values: i }), p = Pt(1), A = /* @__PURE__ */ Symbol.for("lit-noChange"), d = /* @__PURE__ */ Symbol.for("lit-nothing"), st = /* @__PURE__ */ new WeakMap(), g = y.createTreeWalker(y, 129);
 function pt(e, t) {
   if (!V(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
@@ -259,10 +259,10 @@ const Ot = (e, t) => {
   let r, n = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = S;
   for (let c = 0; c < i; c++) {
     const a = e[c];
-    let h, u, l = -1, f = 0;
-    for (; f < a.length && (o.lastIndex = f, u = o.exec(a), u !== null); ) f = o.lastIndex, o === S ? u[1] === "!--" ? o = X : u[1] !== void 0 ? o = tt : u[2] !== void 0 ? (ut.test(u[2]) && (r = RegExp("</" + u[2], "g")), o = v) : u[3] !== void 0 && (o = v) : o === v ? u[0] === ">" ? (o = r ?? S, l = -1) : u[1] === void 0 ? l = -2 : (l = o.lastIndex - u[2].length, h = u[1], o = u[3] === void 0 ? v : u[3] === '"' ? it : et) : o === it || o === et ? o = v : o === X || o === tt ? o = S : (o = v, r = void 0);
-    const _ = o === v && e[c + 1].startsWith("/>") ? " " : "";
-    n += o === S ? a + Ct : l >= 0 ? (s.push(h), a.slice(0, l) + dt + a.slice(l) + m + _) : a + m + (l === -2 ? c : _);
+    let h, u, l = -1, _ = 0;
+    for (; _ < a.length && (o.lastIndex = _, u = o.exec(a), u !== null); ) _ = o.lastIndex, o === S ? u[1] === "!--" ? o = X : u[1] !== void 0 ? o = tt : u[2] !== void 0 ? (ut.test(u[2]) && (r = RegExp("</" + u[2], "g")), o = $) : u[3] !== void 0 && (o = $) : o === $ ? u[0] === ">" ? (o = r ?? S, l = -1) : u[1] === void 0 ? l = -2 : (l = o.lastIndex - u[2].length, h = u[1], o = u[3] === void 0 ? $ : u[3] === '"' ? it : et) : o === it || o === et ? o = $ : o === X || o === tt ? o = S : (o = $, r = void 0);
+    const m = o === $ && e[c + 1].startsWith("/>") ? " " : "";
+    n += o === S ? a + Ct : l >= 0 ? (s.push(h), a.slice(0, l) + dt + a.slice(l) + v + m) : a + v + (l === -2 ? c : m);
   }
   return [pt(e, n + (e[i] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), s];
 };
@@ -279,21 +279,21 @@ class k {
     for (; (r = g.nextNode()) !== null && a.length < c; ) {
       if (r.nodeType === 1) {
         if (r.hasAttributes()) for (const l of r.getAttributeNames()) if (l.endsWith(dt)) {
-          const f = u[o++], _ = r.getAttribute(l).split(m), T = /([.?@])?(.*)/.exec(f);
-          a.push({ type: 1, index: n, name: T[2], strings: _, ctor: T[1] === "." ? Ut : T[1] === "?" ? Mt : T[1] === "@" ? Tt : z }), r.removeAttribute(l);
-        } else l.startsWith(m) && (a.push({ type: 6, index: n }), r.removeAttribute(l));
+          const _ = u[o++], m = r.getAttribute(l).split(v), U = /([.?@])?(.*)/.exec(_);
+          a.push({ type: 1, index: n, name: U[2], strings: m, ctor: U[1] === "." ? Mt : U[1] === "?" ? Tt : U[1] === "@" ? Ut : L }), r.removeAttribute(l);
+        } else l.startsWith(v) && (a.push({ type: 6, index: n }), r.removeAttribute(l));
         if (ut.test(r.tagName)) {
-          const l = r.textContent.split(m), f = l.length - 1;
-          if (f > 0) {
+          const l = r.textContent.split(v), _ = l.length - 1;
+          if (_ > 0) {
             r.textContent = R ? R.emptyScript : "";
-            for (let _ = 0; _ < f; _++) r.append(l[_], P()), g.nextNode(), a.push({ type: 2, index: ++n });
-            r.append(l[f], P());
+            for (let m = 0; m < _; m++) r.append(l[m], P()), g.nextNode(), a.push({ type: 2, index: ++n });
+            r.append(l[_], P());
           }
         }
       } else if (r.nodeType === 8) if (r.data === ht) a.push({ type: 2, index: n });
       else {
         let l = -1;
-        for (; (l = r.data.indexOf(m, l + 1)) !== -1; ) a.push({ type: 7, index: n }), l += m.length - 1;
+        for (; (l = r.data.indexOf(v, l + 1)) !== -1; ) a.push({ type: 7, index: n }), l += v.length - 1;
       }
       n++;
     }
@@ -326,7 +326,7 @@ class kt {
     for (; a !== void 0; ) {
       if (o === a.index) {
         let h;
-        a.type === 2 ? h = new U(n, n.nextSibling, this, t) : a.type === 1 ? h = new a.ctor(n, a.name, a.strings, this, t) : a.type === 6 && (h = new Nt(n, this, t)), this._$AV.push(h), a = s[++c];
+        a.type === 2 ? h = new M(n, n.nextSibling, this, t) : a.type === 1 ? h = new a.ctor(n, a.name, a.strings, this, t) : a.type === 6 && (h = new Nt(n, this, t)), this._$AV.push(h), a = s[++c];
       }
       o !== a?.index && (n = g.nextNode(), o++);
     }
@@ -337,7 +337,7 @@ class kt {
     for (const s of this._$AV) s !== void 0 && (s.strings !== void 0 ? (s._$AI(t, s, i), i += s.strings.length - 2) : s._$AI(t[i])), i++;
   }
 }
-class U {
+class M {
   get _$AU() {
     return this._$AM?._$AU ?? this._$Cv;
   }
@@ -383,7 +383,7 @@ class U {
     V(this._$AH) || (this._$AH = [], this._$AR());
     const i = this._$AH;
     let s, r = 0;
-    for (const n of t) r === i.length ? i.push(s = new U(this.O(P()), this.O(P()), this, this.options)) : s = i[r], s._$AI(n), r++;
+    for (const n of t) r === i.length ? i.push(s = new M(this.O(P()), this.O(P()), this, this.options)) : s = i[r], s._$AI(n), r++;
     r < i.length && (this._$AR(s && s._$AB.nextSibling, r), i.length = r);
   }
   _$AR(t = this._$AA.nextSibling, i) {
@@ -396,7 +396,7 @@ class U {
     this._$AM === void 0 && (this._$Cv = t, this._$AP?.(t));
   }
 }
-class z {
+class L {
   get tagName() {
     return this.element.tagName;
   }
@@ -421,7 +421,7 @@ class z {
     t === d ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, t ?? "");
   }
 }
-class Ut extends z {
+class Mt extends L {
   constructor() {
     super(...arguments), this.type = 3;
   }
@@ -429,7 +429,7 @@ class Ut extends z {
     this.element[this.name] = t === d ? void 0 : t;
   }
 }
-class Mt extends z {
+class Tt extends L {
   constructor() {
     super(...arguments), this.type = 4;
   }
@@ -437,7 +437,7 @@ class Mt extends z {
     this.element.toggleAttribute(this.name, !!t && t !== d);
   }
 }
-class Tt extends z {
+class Ut extends L {
   constructor(t, i, s, r, n) {
     super(t, i, s, r, n), this.type = 5;
   }
@@ -462,13 +462,13 @@ class Nt {
   }
 }
 const Ht = I.litHtmlPolyfillSupport;
-Ht?.(k, U), (I.litHtmlVersions ??= []).push("3.3.3");
+Ht?.(k, M), (I.litHtmlVersions ??= []).push("3.3.3");
 const Rt = (e, t, i) => {
   const s = i?.renderBefore ?? t;
   let r = s._$litPart$;
   if (r === void 0) {
     const n = i?.renderBefore ?? null;
-    s._$litPart$ = r = new U(t.insertBefore(P(), n), n, void 0, i ?? {});
+    s._$litPart$ = r = new M(t.insertBefore(P(), n), n, void 0, i ?? {});
   }
   return r._$AI(e), r;
 };
@@ -499,12 +499,12 @@ E._$litElement$ = !0, E.finalized = !0, F.litElementHydrateSupport?.({ LitElemen
 const Dt = F.litElementPolyfillSupport;
 Dt?.({ LitElement: E });
 (F.litElementVersions ??= []).push("4.2.2");
-const zt = (e) => (t, i) => {
+const Lt = (e) => (t, i) => {
   i !== void 0 ? i.addInitializer(() => {
     customElements.define(e, t);
   }) : customElements.define(e, t);
 };
-const Lt = { attribute: !0, type: String, converter: H, reflect: !1, hasChanged: W }, jt = (e = Lt, t, i) => {
+const zt = { attribute: !0, type: String, converter: H, reflect: !1, hasChanged: W }, jt = (e = zt, t, i) => {
   const { kind: s, metadata: r } = i;
   let n = globalThis.litPropertyMetadata.get(r);
   if (n === void 0 && globalThis.litPropertyMetadata.set(r, n = /* @__PURE__ */ new Map()), s === "setter" && ((e = Object.create(e)).wrapped = !0), n.set(i.name, e), s === "accessor") {
@@ -534,14 +534,14 @@ function ft(e) {
 function q(e) {
   return ft({ ...e, state: !0, attribute: !1 });
 }
-const Bt = "Shut down this computer?", Wt = "Turn off the outlet?", rt = (e, t) => ({
+const Bt = "Shut down this computer?", Wt = "Turn on the outlet?", It = "Turn off the outlet?", rt = (e, t) => ({
   ...e,
   ...t,
   service_data: {
     ...e.service_data ?? {},
     ...t?.service_data ?? {}
   }
-}), It = (e) => {
+}), Vt = (e) => {
   const t = [];
   return e.wol_mac && t.push({
     key: "wake",
@@ -569,7 +569,8 @@ const Bt = "Shut down this computer?", Wt = "Turn off the outlet?", rt = (e, t) 
         icon: "mdi:power-plug",
         domain: "switch",
         service: "turn_on",
-        service_data: { entity_id: e.outlet_entity }
+        service_data: { entity_id: e.outlet_entity },
+        confirmation: Wt
       },
       e.outlet_actions?.turn_on
     ),
@@ -581,24 +582,24 @@ const Bt = "Shut down this computer?", Wt = "Turn off the outlet?", rt = (e, t) 
         domain: "switch",
         service: "turn_off",
         service_data: { entity_id: e.outlet_entity },
-        confirmation: Wt
+        confirmation: It
       },
       e.outlet_actions?.turn_off
     )
   ), t;
-}, Vt = /* @__PURE__ */ new Set(["unavailable", "unknown"]), nt = (e) => {
+}, Ft = /* @__PURE__ */ new Set(["unavailable", "unknown"]), nt = (e) => {
   if (typeof e != "string")
     return;
   const t = e.trim().toLowerCase();
   return t.length > 0 ? t : void 0;
-}, ot = (e) => !e || Vt.has(e), Ft = (e) => {
+}, ot = (e) => !e || Ft.has(e), qt = (e) => {
   if (typeof e == "number")
     return Number.isFinite(e) ? e : void 0;
   if (typeof e == "string" && e.trim().length > 0) {
     const t = Number(e);
     return Number.isFinite(t) ? t : void 0;
   }
-}, qt = (e) => Number.isFinite(e.idleWatts) && Number.isFinite(e.activeWatts), Zt = (e) => {
+}, Zt = (e) => Number.isFinite(e.idleWatts) && Number.isFinite(e.activeWatts), Jt = (e) => {
   const t = nt(e.outletState);
   if (ot(t))
     return "unknown";
@@ -607,23 +608,23 @@ const Bt = "Shut down this computer?", Wt = "Turn off the outlet?", rt = (e, t) 
   if (t !== "on")
     return "unknown";
   const i = nt(e.statusState);
-  if (ot(i) || !qt(e.thresholds))
+  if (ot(i) || !Zt(e.thresholds))
     return "unknown";
   if (i === "on")
     return "online";
   if (i !== "off")
     return "unknown";
-  const s = Ft(e.powerWatts);
+  const s = qt(e.powerWatts);
   return s === void 0 ? "unknown" : s < e.thresholds.idleWatts ? "offline_standby" : s > e.thresholds.activeWatts ? "booting_or_service_unavailable" : "unknown";
-}, $ = (e, t) => {
+}, f = (e, t) => {
   if (!(!e || !t))
     return e.states[t];
-}, Jt = (e, t) => {
+}, Kt = (e, t) => {
   if (e.name)
     return e.name;
   const i = t?.attributes.friendly_name;
   return typeof i == "string" && i.length > 0 ? i : e.entity ?? "Computer";
-}, Kt = mt`
+}, Yt = mt`
   :host {
     display: block;
   }
@@ -871,10 +872,10 @@ const Bt = "Shut down this computer?", Wt = "Turn off the outlet?", rt = (e, t) 
     }
   }
 `;
-var Yt = Object.defineProperty, Gt = Object.getOwnPropertyDescriptor, M = (e, t, i, s) => {
-  for (var r = s > 1 ? void 0 : s ? Gt(t, i) : t, n = e.length - 1, o; n >= 0; n--)
+var Gt = Object.defineProperty, Qt = Object.getOwnPropertyDescriptor, T = (e, t, i, s) => {
+  for (var r = s > 1 ? void 0 : s ? Qt(t, i) : t, n = e.length - 1, o; n >= 0; n--)
     (o = e[n]) && (r = (s ? o(t, i, r) : o(r)) || r);
-  return s && r && Yt(t, i, r), r;
+  return s && r && Gt(t, i, r), r;
 };
 const at = "custom:computer-control-card", ct = { idleWatts: 10, activeWatts: 40 };
 let b = class extends E {
@@ -884,7 +885,7 @@ let b = class extends E {
     this._config = {
       ...e,
       variant: e.variant ?? "compact",
-      actions: e.actions ?? It(e)
+      actions: e.actions ?? Vt(e)
     };
   }
   getCardSize() {
@@ -893,31 +894,31 @@ let b = class extends E {
   render() {
     if (!this._config)
       return p`<ha-card><div class="empty">Card is not configured.</div></ha-card>`;
-    const e = $(this.hass, this._config.entity), t = $(this.hass, this._config.outlet_entity), i = $(this.hass, this._config.status_entity), s = $(this.hass, this._config.power_entity), r = Jt(this._config, e), n = this._statusLabel(Zt({
+    const e = f(this.hass, this._config.entity), t = f(this.hass, this._config.outlet_entity), i = f(this.hass, this._config.status_entity), s = f(this.hass, this._config.power_entity), r = f(this.hass, this._config.energy_today_entity), n = f(this.hass, this._config.energy_month_entity), o = f(this.hass, this._config.energy_total_entity), c = Kt(this._config, e), a = this._statusLabel(Jt({
       outletState: t?.state,
       statusState: i?.state,
       powerWatts: s?.state,
       thresholds: this._thresholds()
-    })), o = this._config.variant === "extended" ? "extended" : "compact";
+    })), h = this._config.variant === "extended" ? "extended" : "compact";
     return p`
-      <ha-card header=${this._config.title ?? d} class=${o}>
-        ${o === "extended" ? this._renderExtended(e, r, n) : this._renderCompact(e, t, s, r, n)}
+      <ha-card header=${this._config.title ?? d} class=${h}>
+        ${h === "extended" ? this._renderExtended(e, r, n, o, c, a) : this._renderCompact(e, t, s, r, n, o, c, a)}
       </ha-card>
     `;
   }
-  _renderCompact(e, t, i, s, r) {
+  _renderCompact(e, t, i, s, r, n, o, c) {
     return p`
       <div class="compact-shell">
         <div class="compact-header">
           <div class="identity">
             <div class="avatar"><ha-icon icon="mdi:desktop-tower-monitor"></ha-icon></div>
             <div>
-              <h2>${s}</h2>
+              <h2>${o}</h2>
               <div class="subtle">Remote computer</div>
             </div>
           </div>
           <div class="header-trailing">
-            <span class="status-pill">${r}</span>
+            <span class="status-pill">${c}</span>
             <button class="icon-button" type="button" aria-label="More options">
               <ha-icon icon="mdi:dots-vertical"></ha-icon>
             </button>
@@ -925,34 +926,35 @@ let b = class extends E {
         </div>
         <div class="signal-row">
           ${this._renderSignal("outlet", "Power Outlet", this._outletStatus(e, t), "mdi:power-plug")}
-          ${this._renderSignal("pc", "PC Status", r, "mdi:desktop-tower")}
+          ${this._renderSignal("pc", "PC Status", c, "mdi:desktop-tower")}
           ${this._renderSignal("draw", "System Draw", this._powerMetric(e, i), "mdi:flash")}
         </div>
-        ${this._activePanel ? this._renderPanel(this._activePanel, e, r) : d}
+        ${this._activePanel ? this._renderPanel(this._activePanel, e, s, r, n, c) : d}
         ${this._renderConfirmationDialog()}
       </div>
     `;
   }
-  _renderExtended(e, t, i) {
+  _renderExtended(e, t, i, s, r, n) {
     return p`
       <div class="extended-shell">
         <div class="extended-header">
           <div class="identity">
             <div class="avatar"><ha-icon icon="mdi:desktop-tower-monitor"></ha-icon></div>
             <div>
-              <h2>${t}</h2>
-              <div class="status">${i}</div>
+              <h2>${r}</h2>
+              <div class="status">${n}</div>
             </div>
           </div>
         </div>
         <div class="status-banner">
           <span>Current status</span>
-          <strong>${i}</strong>
+          <strong>${n}</strong>
         </div>
         <div class="metric-row joined">
-          ${this._renderMetric("Outlet", this._outletStatus(e, $(this.hass, this._config?.outlet_entity)))}
-          ${this._renderMetric("Today", this._metricValue(e, ["today_kwh", "energy_today"]))}
-          ${this._renderMetric("Month", this._metricValue(e, ["month_kwh", "energy_month"]))}
+          ${this._renderMetric("Outlet", this._outletStatus(e, f(this.hass, this._config?.outlet_entity)))}
+          ${this._renderMetric("Today", this._entityMetricValue(t, e, ["today_kwh", "energy_today"]))}
+          ${this._renderMetric("Month", this._entityMetricValue(i, e, ["month_kwh", "energy_month"]))}
+          ${s ? this._renderMetric("Total", this._entityMetricValue(s, e, ["total_kwh", "energy_total"])) : d}
         </div>
         <section>
           <h3>Machine Actions</h3>
@@ -980,11 +982,11 @@ let b = class extends E {
       <strong>${i}</strong>
     </button>`;
   }
-  _renderPanel(e, t, i) {
+  _renderPanel(e, t, i, s, r, n) {
     return e === "outlet" ? p`
         <div class="popover">
           <h3>Power Outlet</h3>
-          <p>Current outlet status: <strong>${this._outletStatus(t, $(this.hass, this._config?.outlet_entity))}</strong></p>
+          <p>Current outlet status: <strong>${this._outletStatus(t, f(this.hass, this._config?.outlet_entity))}</strong></p>
           <div class="action-pair">
             ${this._renderActionButton("Outlet On", "mdi:power-plug", this._findAction("outlet_on"))}
             ${this._renderActionButton("Outlet Off", "mdi:power-plug-off", this._findAction("outlet_off"))}
@@ -994,7 +996,7 @@ let b = class extends E {
       ` : e === "pc" ? p`
         <div class="popover">
           <h3>PC Status</h3>
-          <p>Current PC status: <strong>${i}</strong></p>
+          <p>Current PC status: <strong>${n}</strong></p>
           <div class="action-pair">
             ${this._renderActionButton("Wake PC", "mdi:power", this._findAction("wake"))}
             ${this._renderActionButton("Shutdown", "mdi:power-off", this._findAction("shutdown"))}
@@ -1005,11 +1007,12 @@ let b = class extends E {
       <div class="popover">
         <h3>System Draw</h3>
         <div class="metric-row">
-          ${this._renderMetric("Now", this._powerMetric(t, $(this.hass, this._config?.power_entity)))}
-          ${this._renderMetric("Today", this._metricValue(t, ["today_kwh", "energy_today"]))}
-          ${this._renderMetric("Month", this._metricValue(t, ["month_kwh", "energy_month"]))}
+          ${this._renderMetric("Now", this._powerMetric(t, f(this.hass, this._config?.power_entity)))}
+          ${this._renderMetric("Today", this._entityMetricValue(i, t, ["today_kwh", "energy_today"]))}
+          ${this._renderMetric("Month", this._entityMetricValue(s, t, ["month_kwh", "energy_month"]))}
+          ${r ? this._renderMetric("Total", this._entityMetricValue(r, t, ["total_kwh", "energy_total"])) : d}
         </div>
-        <div class="trend">${this._metric(t, ["trend", "power_trend"], i)}</div>
+        <div class="trend">${this._metric(t, ["trend", "power_trend"], n)}</div>
       </div>
     `;
   }
@@ -1056,6 +1059,13 @@ let b = class extends E {
   _metricValue(e, t, i = "Unavailable") {
     const s = t.map((r) => e?.attributes[r]).find((r) => r != null && r !== "");
     return s === void 0 ? { present: !1, value: i } : { present: !0, value: String(s) };
+  }
+  _entityMetricValue(e, t, i, s = "Unavailable") {
+    if (e && e.state !== "unavailable" && e.state !== "unknown") {
+      const r = e.attributes.unit_of_measurement;
+      return { present: !0, value: `${e.state}${typeof r == "string" ? ` ${r}` : ""}` };
+    }
+    return this._metricValue(t, i, s);
   }
   _metric(e, t, i) {
     return this._metricValue(e, t, i).value;
@@ -1111,21 +1121,21 @@ let b = class extends E {
     await this.hass.callService(e.domain, e.service, t);
   }
 };
-b.styles = Kt;
-M([
+b.styles = Yt;
+T([
   ft({ attribute: !1 })
 ], b.prototype, "hass", 2);
-M([
+T([
   q()
 ], b.prototype, "_config", 2);
-M([
+T([
   q()
 ], b.prototype, "_activePanel", 2);
-M([
+T([
   q()
 ], b.prototype, "_pendingConfirmation", 2);
-b = M([
-  zt("computer-control-card")
+b = T([
+  Lt("computer-control-card")
 ], b);
 window.customCards = window.customCards ?? [];
 window.customCards.push({
