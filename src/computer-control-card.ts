@@ -3,7 +3,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { DEFAULT_ACTIONS } from './actions';
 import { getDisplayName, getEntity, getStatusLabel } from './state';
 import { styles } from './styles';
-import type { ComputerControlActionConfig, ComputerControlCardConfig, HassEntity, HomeAssistant, LovelaceCardConfig } from './types';
+import type { ComputerControlActionConfig, ComputerControlCardConfig, ComputerControlConfirmationHandler, HassEntity, HomeAssistant, LovelaceCardConfig } from './types';
 
 const CARD_TYPE = 'custom:computer-control-card';
 type PanelKey = 'outlet' | 'pc' | 'draw';
@@ -20,6 +20,9 @@ export class ComputerControlCard extends LitElement {
 
   @state()
   private _activePanel: PanelKey | undefined;
+
+  @state()
+  private _pendingConfirmation: ComputerControlActionConfig | undefined;
 
   public setConfig(config: LovelaceCardConfig): void {
     if (config.type !== CARD_TYPE) {
@@ -80,6 +83,7 @@ export class ComputerControlCard extends LitElement {
           ${this._renderSignal('draw', 'System Draw', this._metric(entity, ['power', 'system_draw', 'draw_w'], '— W'), 'mdi:flash')}
         </div>
         ${this._activePanel ? this._renderPanel(this._activePanel, entity, status) : nothing}
+        ${this._renderConfirmationDialog()}
       </div>
     `;
   }
@@ -120,12 +124,13 @@ export class ComputerControlCard extends LitElement {
           </div>
         </section>
         <div class="note">Protected actions require confirmation before they run.</div>
+        ${this._renderConfirmationDialog()}
       </div>
     `;
   }
 
   private _renderSignal(key: PanelKey, label: string, value: string, icon: string) {
-    return html`<button class="signal" type="button" @click=${() => (this._activePanel = this._activePanel === key ? undefined : key)}>
+    return html`<button class="signal" type="button" data-panel=${key} @click=${() => (this._activePanel = this._activePanel === key ? undefined : key)}>
       <ha-icon .icon=${icon}></ha-icon>
       <span>${label}</span>
       <strong>${value}</strong>
@@ -176,6 +181,26 @@ export class ComputerControlCard extends LitElement {
     return html`<div class="metric"><span>${label}</span><strong>${value}</strong></div>`;
   }
 
+  private _renderConfirmationDialog() {
+    const action = this._pendingConfirmation;
+    if (!action?.confirmation) {
+      return nothing;
+    }
+
+    return html`
+      <div class="confirm-backdrop" role="presentation">
+        <dialog class="confirm-dialog" open aria-modal="true" aria-labelledby="confirm-title">
+          <h3 id="confirm-title">Confirm action</h3>
+          <p>${action.confirmation}</p>
+          <div class="action-pair">
+            <button type="button" data-confirm="cancel" @click=${this._cancelConfirmation}>Cancel</button>
+            <button type="button" data-confirm="accept" @click=${this._acceptConfirmation}>Confirm</button>
+          </div>
+        </dialog>
+      </div>
+    `;
+  }
+
   private _renderActionButton(label: string, icon: string, action: ComputerControlActionConfig | undefined) {
     return html`
       <button type="button" ?disabled=${!this.hass || !action} @click=${() => action && this._handleAction(action)}>
@@ -204,7 +229,33 @@ export class ComputerControlCard extends LitElement {
 
   private async _handleAction(action: ComputerControlActionConfig): Promise<void> {
     if (!this.hass) return;
-    if (action.confirmation && !window.confirm(action.confirmation)) return;
+    if (action.confirmation) {
+      const confirmAction: ComputerControlConfirmationHandler | undefined = this._config?.confirmAction;
+      if (confirmAction) {
+        if (!(await confirmAction(action.confirmation, action))) return;
+      } else {
+        this._pendingConfirmation = action;
+        return;
+      }
+    }
+
+    await this._callActionService(action);
+  }
+
+  private async _acceptConfirmation(): Promise<void> {
+    const action = this._pendingConfirmation;
+    this._pendingConfirmation = undefined;
+    if (action) {
+      await this._callActionService(action);
+    }
+  }
+
+  private _cancelConfirmation(): void {
+    this._pendingConfirmation = undefined;
+  }
+
+  private async _callActionService(action: ComputerControlActionConfig): Promise<void> {
+    if (!this.hass) return;
     const serviceData = {
       ...(this._config?.entity ? { entity_id: this._config.entity } : {}),
       ...(action.service_data ?? {}),

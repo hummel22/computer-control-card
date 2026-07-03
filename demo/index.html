@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Computer Control Card Demo</title>
+  </head>
+  <body>
+    <header class="demo-header">
+      <div>
+        <p class="eyebrow">Home Assistant Lovelace custom card</p>
+        <h1>Computer Control Card Demo</h1>
+      </div>
+      <label class="theme-toggle">
+        <input type="checkbox" data-theme-toggle />
+        Dark theme
+      </label>
+    </header>
+
+    <section class="toolbar" aria-label="Demo controls">
+      <label>
+        Fixture
+        <select data-fixture>
+          <option value="online">online</option>
+          <option value="outlet_off">outlet_off</option>
+          <option value="offline_standby">offline_standby</option>
+          <option value="booting_or_service_unavailable">booting_or_service_unavailable</option>
+          <option value="status_unavailable">status_unavailable</option>
+          <option value="power_unavailable">power_unavailable</option>
+          <option value="missing_optional_entities">missing_optional_entities</option>
+        </select>
+      </label>
+      <div class="panel-hooks" aria-label="Compact popover test hooks">
+        <button type="button" data-open-panel="outlet">Open outlet popover</button>
+        <button type="button" data-open-panel="pc">Open PC status popover</button>
+        <button type="button" data-open-panel="draw">Open system draw popover</button>
+      </div>
+    </section>
+
+    <main class="viewports">
+      <section class="viewport viewport-mobile" data-testid="viewport-mobile-narrow">
+        <h2>Mobile narrow</h2>
+        <div class="card-host" data-card-host="mobile-narrow"></div>
+      </section>
+      <section class="viewport viewport-dashboard" data-testid="viewport-dashboard-medium">
+        <h2>Dashboard medium</h2>
+        <div class="card-host" data-card-host="dashboard-medium"></div>
+      </section>
+      <section class="viewport viewport-wide" data-testid="viewport-wide-admin">
+        <h2>Wide admin</h2>
+        <div class="card-host" data-card-host="wide-admin"></div>
+      </section>
+    </main>
+
+    <aside class="event-log" aria-label="Service call event log">
+      <h2>Service calls</h2>
+      <ol data-service-log></ol>
+    </aside>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

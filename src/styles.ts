@@ -204,6 +204,28 @@ export const styles = css`
     opacity: 0.5;
   }
 
+  .confirm-backdrop {
+    align-items: center;
+    background: rgb(0 0 0 / 28%);
+    display: flex;
+    inset: 0;
+    justify-content: center;
+    position: fixed;
+    z-index: 10;
+  }
+
+  .confirm-dialog {
+    background: var(--card-background-color, #fff);
+    border: 1px solid var(--divider-color, transparent);
+    border-radius: 18px;
+    box-shadow: var(--ha-card-box-shadow, 0 12px 32px rgb(0 0 0 / 28%));
+    color: var(--primary-text-color);
+    display: grid;
+    gap: 14px;
+    max-width: min(360px, calc(100vw - 32px));
+    padding: 18px;
+  }
+
   @media (max-width: 420px) {
     .compact-header,
     .action-pair {

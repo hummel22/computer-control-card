@@ -26,6 +26,8 @@ export interface ComputerControlActionConfig {
   confirmation?: string;
 }
 
+export type ComputerControlConfirmationHandler = (message: string, action: ComputerControlActionConfig) => boolean | Promise<boolean>;
+
 export interface ComputerControlCardConfig extends LovelaceCardConfig {
   type: 'custom:computer-control-card';
   title?: string;
@@ -33,6 +35,7 @@ export interface ComputerControlCardConfig extends LovelaceCardConfig {
   name?: string;
   variant?: 'compact' | 'extended';
   actions?: ComputerControlActionConfig[];
+  confirmAction?: ComputerControlConfirmationHandler;
 }
 
 export interface LovelaceCard extends HTMLElement {
