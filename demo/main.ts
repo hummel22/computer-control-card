@@ -35,7 +35,7 @@ let hass: DemoHomeAssistant;
 const cards: LovelaceCard[] = [];
 
 const actions: ComputerControlCardConfig['actions'] = [
-  { label: 'Wake PC', icon: 'mdi:power', domain: 'button', service: 'press', service_data: { entity_id: 'button.demo_pc_wake' } },
+  { label: 'Wake PC', icon: 'mdi:power', domain: 'wake_on_lan', service: 'send_magic_packet', service_data: { mac: 'AA:BB:CC:DD:EE:FF', broadcast_address: '192.168.1.255' } },
   { label: 'Shutdown', icon: 'mdi:power-off', domain: 'button', service: 'press', service_data: { entity_id: 'button.demo_pc_shutdown' }, confirmation: 'Shut down the demo PC?' },
   { label: 'Outlet On', icon: 'mdi:power-plug', domain: 'switch', service: 'turn_on', service_data: { entity_id: OUTLET_ENTITY } },
   { label: 'Outlet Off', icon: 'mdi:power-plug-off', domain: 'switch', service: 'turn_off', service_data: { entity_id: OUTLET_ENTITY }, confirmation: 'Turn off the outlet?' },
