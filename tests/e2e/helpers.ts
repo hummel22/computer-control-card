@@ -20,6 +20,8 @@ export const wakeMac = 'AA:BB:CC:DD:EE:FF';
 export const wakeBroadcastAddress = '192.168.1.255';
 export const shutdownEntity = 'button.demo_pc_shutdown';
 export const outletEntity = 'switch.demo_pc_outlet';
+export const statusEntity = 'binary_sensor.demo_pc_status';
+export const powerEntity = 'sensor.demo_pc_power';
 
 export const card = (page: Page, variant: CardVariant): Locator =>
   page.locator(`[data-card-host="dashboard-medium"] computer-control-card[data-variant="${variant}"]`);
@@ -78,6 +80,10 @@ export const configureDashboardCard = async (
       type: 'custom:computer-control-card',
       title: `${payload.variant} Computer Control`,
       entity: 'sensor.demo_pc_summary',
+      outlet_entity: 'switch.demo_pc_outlet',
+      status_entity: 'binary_sensor.demo_pc_status',
+      power_entity: 'sensor.demo_pc_power',
+      thresholds: { idleWatts: 10, activeWatts: 40 },
       name: 'Studio Workstation',
       variant: payload.variant,
       actions: payload.actions,

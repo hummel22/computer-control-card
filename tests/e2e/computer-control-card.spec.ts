@@ -16,6 +16,16 @@ import {
   wakeMac,
 } from './helpers';
 
+const expectedStatusLabels: Record<(typeof fixtureStates)[number], string> = {
+  online: 'Online',
+  outlet_off: 'Outlet off',
+  offline_standby: 'Offline standby',
+  booting_or_service_unavailable: 'Booting or service unavailable',
+  status_unavailable: 'Unknown',
+  power_unavailable: 'Unknown',
+  missing_optional_entities: 'Unknown',
+};
+
 const screenshot = async (locator: ReturnType<typeof card>, name: string): Promise<void> => {
   await locator.screenshot({ path: `test-results/${name}.png` });
 };
@@ -30,6 +40,8 @@ test.describe('Computer Control Card demo', () => {
       const compact = card(page, 'compact');
       await expect(compact).toBeVisible();
       await expect(compact.locator('.compact-shell')).toBeVisible();
+      await expect(compact.locator('.status-pill')).toHaveText(expectedStatusLabels[fixture]);
+      await expect(signal(page, 'pc')).toContainText(expectedStatusLabels[fixture]);
       await screenshot(compact, `compact-${fixture}`);
     }
 
@@ -45,6 +57,8 @@ test.describe('Computer Control Card demo', () => {
       const extended = card(page, 'extended');
       await expect(extended).toBeVisible();
       await expect(extended.locator('.extended-shell')).toBeVisible();
+      await expect(extended.locator('.extended-header .status')).toHaveText(expectedStatusLabels[fixture]);
+      await expect(extended.locator('.status-banner strong')).toHaveText(expectedStatusLabels[fixture]);
       await screenshot(extended, `extended-${fixture}`);
     }
 

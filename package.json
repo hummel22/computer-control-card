@@ -17,8 +17,12 @@
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
     "test": "tsx --test tests/unit/*.test.ts",
+    "setup:e2e": "playwright install --with-deps chromium",
+    "pretest:e2e": "npm run setup:e2e",
     "test:e2e": "playwright test",
+    "pretest:visual": "npm run setup:e2e",
     "test:visual": "playwright test --grep @screenshots",
+    "prescreenshots": "npm run setup:e2e",
     "screenshots": "playwright test --grep @screenshots"
   },
   "keywords": [

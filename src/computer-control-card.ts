@@ -1,11 +1,12 @@
 import { LitElement, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { DEFAULT_ACTIONS } from './actions';
-import { getDisplayName, getEntity, getStatusLabel } from './state';
+import { deriveComputerState, getDisplayName, getEntity } from './state';
 import { styles } from './styles';
 import type { ComputerControlActionConfig, ComputerControlCardConfig, ComputerControlConfirmationHandler, HassEntity, HomeAssistant, LovelaceCardConfig } from './types';
 
 const CARD_TYPE = 'custom:computer-control-card';
+const DEFAULT_THRESHOLDS = { idleWatts: 10, activeWatts: 40 };
 type PanelKey = 'outlet' | 'pc' | 'draw';
 
 @customElement('computer-control-card')
@@ -46,20 +47,28 @@ export class ComputerControlCard extends LitElement {
     }
 
     const entity = getEntity(this.hass, this._config.entity);
+    const outletEntity = getEntity(this.hass, this._config.outlet_entity);
+    const statusEntity = getEntity(this.hass, this._config.status_entity);
+    const powerEntity = getEntity(this.hass, this._config.power_entity);
     const displayName = getDisplayName(this._config, entity);
-    const status = getStatusLabel(entity);
+    const status = this._statusLabel(deriveComputerState({
+      outletState: outletEntity?.state,
+      statusState: statusEntity?.state,
+      powerWatts: powerEntity?.state,
+      thresholds: this._thresholds(),
+    }));
     const variant = this._config.variant === 'extended' ? 'extended' : 'compact';
 
     return html`
       <ha-card header=${this._config.title ?? nothing} class=${variant}>
         ${variant === 'extended'
           ? this._renderExtended(entity, displayName, status)
-          : this._renderCompact(entity, displayName, status)}
+          : this._renderCompact(entity, outletEntity, powerEntity, displayName, status)}
       </ha-card>
     `;
   }
 
-  private _renderCompact(entity: HassEntity | undefined, displayName: string, status: string) {
+  private _renderCompact(entity: HassEntity | undefined, outletEntity: HassEntity | undefined, powerEntity: HassEntity | undefined, displayName: string, status: string) {
     return html`
       <div class="compact-shell">
         <div class="compact-header">
@@ -78,9 +87,9 @@ export class ComputerControlCard extends LitElement {
           </div>
         </div>
         <div class="signal-row">
-          ${this._renderSignal('outlet', 'Power Outlet', this._outletStatus(entity), 'mdi:power-plug')}
+          ${this._renderSignal('outlet', 'Power Outlet', this._outletStatus(entity, outletEntity), 'mdi:power-plug')}
           ${this._renderSignal('pc', 'PC Status', status, 'mdi:desktop-tower')}
-          ${this._renderSignal('draw', 'System Draw', this._metric(entity, ['power', 'system_draw', 'draw_w'], '— W'), 'mdi:flash')}
+          ${this._renderSignal('draw', 'System Draw', this._powerMetric(entity, powerEntity), 'mdi:flash')}
         </div>
         ${this._activePanel ? this._renderPanel(this._activePanel, entity, status) : nothing}
         ${this._renderConfirmationDialog()}
@@ -105,7 +114,7 @@ export class ComputerControlCard extends LitElement {
           <strong>${status}</strong>
         </div>
         <div class="metric-row joined">
-          ${this._renderMetric('Outlet', this._outletStatus(entity))}
+          ${this._renderMetric('Outlet', this._outletStatus(entity, getEntity(this.hass, this._config?.outlet_entity)))}
           ${this._renderMetric('Today', this._metric(entity, ['today_kwh', 'energy_today'], '— kWh'))}
           ${this._renderMetric('Month', this._metric(entity, ['month_kwh', 'energy_month'], '— kWh'))}
         </div>
@@ -142,7 +151,7 @@ export class ComputerControlCard extends LitElement {
       return html`
         <div class="popover">
           <h3>Power Outlet</h3>
-          <p>Current outlet status: <strong>${this._outletStatus(entity)}</strong></p>
+          <p>Current outlet status: <strong>${this._outletStatus(entity, getEntity(this.hass, this._config?.outlet_entity))}</strong></p>
           <div class="action-pair">
             ${this._renderActionButton('Outlet On', 'mdi:power-plug', this._findAction('outlet on', 'on'))}
             ${this._renderActionButton('Outlet Off', 'mdi:power-plug-off', this._findAction('outlet off', 'off'))}
@@ -168,7 +177,7 @@ export class ComputerControlCard extends LitElement {
       <div class="popover">
         <h3>System Draw</h3>
         <div class="metric-row">
-          ${this._renderMetric('Now', this._metric(entity, ['power', 'system_draw', 'draw_w'], '— W'))}
+          ${this._renderMetric('Now', this._powerMetric(entity, getEntity(this.hass, this._config?.power_entity)))}
           ${this._renderMetric('Today', this._metric(entity, ['today_kwh', 'energy_today'], '— kWh'))}
           ${this._renderMetric('Month', this._metric(entity, ['month_kwh', 'energy_month'], '— kWh'))}
         </div>
@@ -223,8 +232,35 @@ export class ComputerControlCard extends LitElement {
     return value === undefined ? fallback : String(value);
   }
 
-  private _outletStatus(entity: HassEntity | undefined): string {
-    return this._metric(entity, ['outlet_status', 'outlet', 'power_outlet'], 'Unknown');
+  private _outletStatus(entity: HassEntity | undefined, outletEntity: HassEntity | undefined): string {
+    return outletEntity?.state ?? this._metric(entity, ['outlet_status', 'outlet', 'power_outlet'], 'Unknown');
+  }
+
+  private _powerMetric(entity: HassEntity | undefined, powerEntity: HassEntity | undefined): string {
+    const unit = powerEntity?.attributes.unit_of_measurement;
+    if (powerEntity && powerEntity.state !== 'unavailable' && powerEntity.state !== 'unknown') {
+      return `${powerEntity.state}${typeof unit === 'string' ? ` ${unit}` : ''}`;
+    }
+
+    return this._metric(entity, ['power', 'system_draw', 'draw_w'], '— W');
+  }
+
+  private _thresholds() {
+    return {
+      idleWatts: this._config?.thresholds?.idleWatts ?? DEFAULT_THRESHOLDS.idleWatts,
+      activeWatts: this._config?.thresholds?.activeWatts ?? DEFAULT_THRESHOLDS.activeWatts,
+    };
+  }
+
+  private _statusLabel(state: ReturnType<typeof deriveComputerState>): string {
+    const labels: Record<ReturnType<typeof deriveComputerState>, string> = {
+      outlet_off: 'Outlet off',
+      online: 'Online',
+      offline_standby: 'Offline standby',
+      booting_or_service_unavailable: 'Booting or service unavailable',
+      unknown: 'Unknown',
+    };
+    return labels[state];
   }
 
   private async _handleAction(action: ComputerControlActionConfig): Promise<void> {
