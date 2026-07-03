@@ -41,3 +41,6 @@ jobs:
         uses: hacs/action@main
         with:
           category: plugin
+          # Repository topics are managed in GitHub settings and cannot be fixed
+          # from a pull request. Keep HACS structure checks actionable in CI.
+          ignore: topics
