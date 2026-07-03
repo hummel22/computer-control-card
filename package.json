@@ -16,7 +16,7 @@
     "build": "vite build",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
-    "test": "node --test",
+    "test": "tsx --test tests/unit/*.test.ts",
     "test:e2e": "echo \"No e2e tests configured yet\"",
     "test:visual": "echo \"No visual tests configured yet\"",
     "screenshots": "echo \"No screenshot workflow configured yet\""
@@ -34,6 +34,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.0.10",
+    "tsx": "^4.23.0",
     "typescript": "^5.8.3",
     "vite": "^7.0.0"
   }
