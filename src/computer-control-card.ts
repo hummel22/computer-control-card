@@ -3,16 +3,53 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { buildDefaultActions } from './actions';
 import { deriveComputerState, getDisplayName, getEntity } from './state';
 import { styles } from './styles';
-import type { ComputerControlActionConfig, ComputerControlActionKey, ComputerControlCardConfig, ComputerControlConfirmationHandler, HassEntity, HomeAssistant, LovelaceCardConfig } from './types';
+import type { ComputerControlActionConfig, ComputerControlActionKey, ComputerControlCardConfig, ComputerControlConfirmationHandler, HassEntity, HomeAssistant, HomeAssistantFormSchema, LovelaceCardConfig, LovelaceGridOptions } from './types';
 
 const CARD_TYPE = 'custom:computer-control-card';
 const DEFAULT_THRESHOLDS = { idleWatts: 10, activeWatts: 40 };
+
+const CONFIG_FORM_SCHEMA: HomeAssistantFormSchema[] = [
+  { name: 'title', selector: { text: {} } },
+  { name: 'name', selector: { text: {} } },
+  { name: 'entity', selector: { entity: {} } },
+  { name: 'status_entity', selector: { entity: {} } },
+  { name: 'power_entity', selector: { entity: {} } },
+  { name: 'energy_today_entity', selector: { entity: {} } },
+  { name: 'energy_month_entity', selector: { entity: {} } },
+  { name: 'energy_total_entity', selector: { entity: {} } },
+  { name: 'wol_mac', selector: { text: {} } },
+  { name: 'broadcast_address', selector: { text: {} } },
+  { name: 'shutdown_entity', selector: { entity: {} } },
+  { name: 'outlet_entity', selector: { entity: {} } },
+  {
+    name: 'variant',
+    selector: {
+      select: {
+        options: [
+          { label: 'Compact', value: 'compact' },
+          { label: 'Extended', value: 'extended' },
+        ],
+      },
+    },
+  },
+];
 type PanelKey = 'outlet' | 'pc' | 'draw';
 type MetricValue = { present: true; value: string } | { present: false; value: string };
 
 @customElement('computer-control-card')
 export class ComputerControlCard extends LitElement {
   static override styles = styles;
+
+  public static getConfigForm(): HomeAssistantFormSchema[] {
+    return CONFIG_FORM_SCHEMA;
+  }
+
+  public static getStubConfig(): Omit<ComputerControlCardConfig, 'type'> {
+    return {
+      name: 'Computer',
+      variant: 'compact',
+    };
+  }
 
   @property({ attribute: false })
   public hass?: HomeAssistant;
@@ -40,6 +77,10 @@ export class ComputerControlCard extends LitElement {
 
   public getCardSize(): number {
     return this._config?.variant === 'extended' ? 5 : 3;
+  }
+
+  public getGridOptions(): LovelaceGridOptions {
+    return this._config?.variant === 'extended' ? { columns: 12, rows: 5 } : { columns: 6, rows: 3 };
   }
 
   protected override render() {
@@ -359,6 +400,7 @@ window.customCards.push({
   name: 'Computer Control Card',
   description: 'Frontend-only Lovelace card for controlling computers remotely.',
   preview: true,
+  documentationURL: 'https://github.com/kevinboone/computer-control-card#readme',
 });
 
 declare global {

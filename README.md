@@ -121,7 +121,6 @@ outlet_actions:
     confirmation: This immediately removes power from Desktop PC. Continue?
 ```
 
-
 ### Direct Wake-on-LAN without a Wake switch
 
 If you do not have a Home Assistant Wake-on-LAN switch entity, configure the card with the PC MAC address and the broadcast address for the target network. The generated Wake PC action calls `wake_on_lan.send_magic_packet` directly; no Home Assistant script or helper is required.
@@ -199,6 +198,14 @@ The images below are design references, not exact render output from the current
 ![Extended design reference showing a larger Desktop PC control card with status banner, metrics, machine actions, and power controls.](docs/assets/extended-design-reference.png)
 
 **Extended mockup:** a full-height control surface with an online status banner, energy metrics, visible shutdown/wake actions, visible outlet controls, and a confirmation reminder.
+
+## Visual editor support
+
+Home Assistant can show this card in the dashboard visual editor. The editor exposes common fields for the card title, display name, primary/status/power/energy entities, Wake-on-LAN settings, shutdown and outlet entities, and the compact or extended variant. The generated stub configuration starts with a compact card named `Computer`; add your own entities and action targets before saving it to a real dashboard.
+
+## Releasing
+
+Release instructions live in [docs/releasing.md](docs/releasing.md). In short, use `npm run release:patch`, `npm run release:minor`, or `npm run release:major` to bump the package version and create a matching `vX.Y.Z` tag, then let the release workflow build and upload `dist/computer-control-card.js` for HACS users.
 
 ## Development
 
