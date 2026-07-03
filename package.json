@@ -1,0 +1,40 @@
+{
+  "name": "computer-control-card",
+  "version": "0.1.0",
+  "description": "Frontend-only Home Assistant Lovelace card for controlling computers remotely.",
+  "type": "module",
+  "main": "dist/computer-control-card.js",
+  "module": "dist/computer-control-card.js",
+  "files": [
+    "dist",
+    "hacs.json",
+    "README.md"
+  ],
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "demo": "vite --host 0.0.0.0 --open /demo/",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "test": "node --test",
+    "test:e2e": "echo \"No e2e tests configured yet\"",
+    "test:visual": "echo \"No visual tests configured yet\"",
+    "screenshots": "echo \"No screenshot workflow configured yet\""
+  },
+  "keywords": [
+    "home-assistant",
+    "lovelace",
+    "hacs",
+    "custom-card",
+    "lit"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "lit": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.10",
+    "typescript": "^5.8.3",
+    "vite": "^7.0.0"
+  }
+}
