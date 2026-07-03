@@ -57,7 +57,7 @@ name: Desktop PC
 variant: compact
 ```
 
-The configured `entity` is used for display state and metric attributes. Action buttons call the services configured under `actions`. If no custom actions are supplied, the card includes basic Wake, Shutdown, and Restart button-style defaults.
+The configured `entity` is used for display state and metric attributes. First-class action fields generate the common controls automatically: `wol_mac` and `broadcast_address` create a `wake_on_lan.send_magic_packet` Wake PC action, `shutdown_entity` creates a `button.press` Shutdown action, and `outlet_entity` creates switch-based outlet controls. You can still provide `actions` for fully custom service calls when your setup needs them.
 
 ### Entity attributes used by the card
 
@@ -81,32 +81,12 @@ title: Computer
 entity: sensor.desktop_pc_status
 name: Desktop PC
 variant: compact
-actions:
-  - label: Wake PC
-    icon: mdi:rocket-launch
-    domain: button
-    service: press
-    service_data:
-      entity_id: button.desktop_pc_wake
-  - label: Shutdown PC
-    icon: mdi:power-off
-    domain: button
-    service: press
-    service_data:
-      entity_id: button.desktop_pc_shutdown
-    confirmation: Shut down Desktop PC?
-  - label: Outlet On
-    icon: mdi:power-plug
-    domain: switch
-    service: turn_on
-    service_data:
-      entity_id: switch.desktop_pc_outlet
-  - label: Outlet Off
-    icon: mdi:power-plug-off
-    domain: switch
-    service: turn_off
-    service_data:
-      entity_id: switch.desktop_pc_outlet
+wol_mac: AA:BB:CC:DD:EE:FF
+broadcast_address: 192.168.1.255
+shutdown_entity: button.desktop_pc_shutdown
+outlet_entity: switch.desktop_pc_outlet
+outlet_actions:
+  turn_off:
     confirmation: Hard power off Desktop PC?
 ```
 
@@ -118,38 +98,25 @@ Use the extended variant for a larger dashboard tile that keeps machine actions 
 type: custom:computer-control-card
 title: Desktop Controls
 entity: sensor.desktop_pc_status
+status_entity: binary_sensor.desktop_pc_online
+power_entity: sensor.desktop_pc_power
 name: Desktop PC
 variant: extended
-actions:
-  - label: Shutdown
-    icon: mdi:power-off
-    domain: script
-    service: turn_on
-    service_data:
-      entity_id: script.desktop_pc_graceful_shutdown
-    confirmation: Gracefully shut down Desktop PC?
-  - label: Wake PC
-    icon: mdi:rocket-launch
-    domain: button
-    service: press
-    service_data:
-      entity_id: button.desktop_pc_wake
-  - label: Outlet On
+wol_mac: AA:BB:CC:DD:EE:FF
+broadcast_address: 192.168.1.255
+shutdown_entity: button.desktop_pc_shutdown
+outlet_entity: switch.desktop_pc_outlet
+outlet_actions:
+  turn_on:
     icon: mdi:power-plug
-    domain: switch
-    service: turn_on
-    service_data:
-      entity_id: switch.desktop_pc_outlet
-  - label: Outlet Off
+  turn_off:
     icon: mdi:power-plug-off
-    domain: switch
-    service: turn_off
-    service_data:
-      entity_id: switch.desktop_pc_outlet
     confirmation: This immediately removes power from Desktop PC. Continue?
 ```
 
-Action calls include the configured top-level `entity` as `entity_id` by default. When an action controls a different entity, provide that target in `service_data.entity_id` as shown above. For services that do not accept `entity_id`, route the operation through a Home Assistant script or button helper and point the card action at that entity instead.
+For fully custom controls, provide `actions` with explicit Home Assistant `domain`, `service`, and `service_data`. Custom `actions` replace the automatically generated first-class actions.
+
+Generated first-class actions include only the service data required by that action. For custom `actions`, provide any target entity in `service_data.entity_id`. For services that do not accept `entity_id`, route the operation through a Home Assistant script or button helper and point the card action at that entity instead.
 
 ## Screenshots and design references
 

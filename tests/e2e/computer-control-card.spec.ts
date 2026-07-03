@@ -97,7 +97,6 @@ test.describe('Computer Control Card demo', () => {
     await actionButton(card(page, 'compact'), 'Wake PC').click();
 
     await expectServiceCall(page, 'wake_on_lan.send_magic_packet', {
-      entity_id: 'sensor.demo_pc_summary',
       mac: wakeMac,
       broadcast_address: wakeBroadcastAddress,
     });
@@ -142,10 +141,13 @@ test.describe('Computer Control Card demo', () => {
     await selectFixture(page, 'missing_optional_entities');
     await signal(page, 'pc').click();
 
-    await configureDashboardCard(page, 'compact', [
-      { label: 'Outlet On', icon: 'mdi:power-plug', domain: 'switch', service: 'turn_on', service_data: { entity_id: outletEntity } },
-      { label: 'Outlet Off', icon: 'mdi:power-plug-off', domain: 'switch', service: 'turn_off', service_data: { entity_id: outletEntity }, confirmation: 'Turn off the outlet?' },
-    ]);
+    await configureDashboardCard(page, 'compact', {
+      wol_mac: undefined,
+      shutdown_entity: undefined,
+      outlet_actions: {
+        turn_off: { confirmation: 'Turn off the outlet?' },
+      },
+    });
 
     await expect(actionButton(card(page, 'compact'), 'Wake PC')).toBeDisabled();
     await expect(actionButton(card(page, 'compact'), 'Shutdown')).toBeDisabled();

@@ -34,24 +34,22 @@ const themeToggle = document.querySelector<HTMLInputElement>('[data-theme-toggle
 let hass: DemoHomeAssistant;
 const cards: LovelaceCard[] = [];
 
-const actions: ComputerControlCardConfig['actions'] = [
-  { label: 'Wake PC', icon: 'mdi:power', domain: 'wake_on_lan', service: 'send_magic_packet', service_data: { mac: 'AA:BB:CC:DD:EE:FF', broadcast_address: '192.168.1.255' } },
-  { label: 'Shutdown', icon: 'mdi:power-off', domain: 'button', service: 'press', service_data: { entity_id: 'button.demo_pc_shutdown' }, confirmation: 'Shut down the demo PC?' },
-  { label: 'Outlet On', icon: 'mdi:power-plug', domain: 'switch', service: 'turn_on', service_data: { entity_id: OUTLET_ENTITY } },
-  { label: 'Outlet Off', icon: 'mdi:power-plug-off', domain: 'switch', service: 'turn_off', service_data: { entity_id: OUTLET_ENTITY }, confirmation: 'Turn off the outlet?' },
-];
-
 const baseConfig = (variant: 'compact' | 'extended'): ComputerControlCardConfig => ({
   type: 'custom:computer-control-card',
   title: `${variant === 'compact' ? 'Compact' : 'Extended'} Computer Control`,
   entity: PRIMARY_ENTITY,
+  wol_mac: 'AA:BB:CC:DD:EE:FF',
+  broadcast_address: '192.168.1.255',
+  shutdown_entity: 'button.demo_pc_shutdown',
   outlet_entity: OUTLET_ENTITY,
+  outlet_actions: {
+    turn_off: { confirmation: 'Turn off the outlet?' },
+  },
   status_entity: STATUS_ENTITY,
   power_entity: POWER_ENTITY,
   thresholds: { idleWatts: 10, activeWatts: 40 },
   name: 'Studio Workstation',
   variant,
-  actions,
 });
 
 const appendLog = (entry: ServiceCallLogEntry) => {
