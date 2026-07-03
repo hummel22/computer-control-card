@@ -27,11 +27,11 @@ const expectedStatusLabels: Record<(typeof fixtureStates)[number], string> = {
 };
 
 const screenshot = async (locator: ReturnType<typeof card>, name: string): Promise<void> => {
-  await locator.screenshot({ path: `test-results/${name}.png` });
+  await locator.screenshot({ path: `artifacts/screenshots/${name}.png` });
 };
 
 test.describe('Computer Control Card demo', () => {
-  test('renders compact variant in every fixture state and captures screenshots', async ({ page }) => {
+  test('renders compact variant in every fixture state and captures screenshots @screenshots', async ({ page }) => {
     const consoleErrors = expectNoConsoleErrors(page);
     await gotoDemo(page);
 
@@ -48,7 +48,7 @@ test.describe('Computer Control Card demo', () => {
     expect(consoleErrors).toEqual([]);
   });
 
-  test('renders extended variant in every fixture state and captures screenshots', async ({ page }) => {
+  test('renders extended variant in every fixture state and captures screenshots @screenshots', async ({ page }) => {
     const consoleErrors = expectNoConsoleErrors(page);
     await gotoDemo(page);
 
