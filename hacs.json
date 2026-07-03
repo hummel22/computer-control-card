@@ -1,5 +1,5 @@
 {
   "name": "Computer Control Card",
   "render_readme": true,
-  "filename": "computer-control-card.js"
+  "filename": "dist/computer-control-card.js"
 }
