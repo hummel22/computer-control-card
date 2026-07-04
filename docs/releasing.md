@@ -1,45 +1,57 @@
 # Releasing
 
-This project uses semantic versioning for published card releases:
+This project publishes a frontend-only Home Assistant Lovelace card as a HACS Dashboard/Lovelace plugin.
+It is not a Home Assistant Python integration, so it intentionally does not use `custom_components/`, `manifest.json`, or integration brand assets.
+It is not a HACS custom template, so it intentionally does not ship a root `.jinja` file.
 
-- Patch releases (`v0.1.1`) are for bug fixes and documentation-only release clarifications.
-- Minor releases (`v0.2.0`) are for backward-compatible card features.
-- Major releases (`v1.0.0`) are for breaking configuration or behavior changes.
+## Version policy
 
-## Prepare a release
+Every commit that lands on `main` must result in a full GitHub release with its own semantic version tag.
+This repository always increments the patch component for those automated releases (`X.Y.Z` -> `X.Y.(Z+1)`).
+Minor and major version bumps are intentionally not exposed as npm helper scripts so the release cadence stays consistent with the HACS default-repository expectation that released code is available from GitHub releases.
 
-1. Start from a clean working tree on the branch you intend to release from.
-2. Bump `package.json` and `package-lock.json` with one of the npm helpers:
+## Automated release from `main`
 
-   ```sh
-   npm run release:patch
-   npm run release:minor
-   npm run release:major
-   ```
+The `Version bump and release` workflow runs for pushes to `main` unless the push was made by `github-actions[bot]`.
+The workflow:
 
-   These scripts call `npm version patch`, `npm version minor`, or `npm version major`. The generated git tag must match the package version with a leading `v`, such as `v0.2.0` for package version `0.2.0`.
+1. Installs dependencies with `npm ci`.
+2. Runs `npm run typecheck` and `npm test`.
+3. Builds `dist/computer-control-card.js`.
+4. Verifies `hacs.json` points to the built card filename.
+5. Runs `npm version patch` to update `package.json` and `package-lock.json`, create a `chore(release): vX.Y.Z` commit, and create the matching `vX.Y.Z` tag.
+6. Pushes the version commit and tag.
+7. Publishes a full GitHub release for that tag with `dist/computer-control-card.js` attached.
 
-3. Build and test the release candidate:
+The separate `Release` workflow remains available for manual or externally-created `vX.Y.Z` tags and verifies that the tag matches `package.json` before publishing an artifact.
 
-   ```sh
-   npm ci
-   npm run typecheck
-   npm test
-   npm run build
-   ```
+## Manual patch preparation
 
-4. Confirm the HACS artifact exists at `dist/computer-control-card.js` and is built from the same commit as the version tag.
-5. Push the commit and tag:
+For local release preparation, run only the patch helper:
 
-   ```sh
-   git push origin main
-   git push origin vX.Y.Z
-   ```
+```sh
+npm run release:patch
+```
 
-## GitHub release workflow
+This updates `package.json` and `package-lock.json` without creating a local git tag. Commit the updated version files only when you intentionally need to prepare a patch release outside the automated `main` workflow.
 
-Pushing a `vX.Y.Z` tag runs the release workflow. The workflow verifies that the tag matches `package.json`, installs dependencies with `npm ci`, runs typecheck and unit tests, builds `dist/computer-control-card.js`, and uploads the built card file as a GitHub release asset.
+Before pushing release-related changes, verify the package locally:
 
-## HACS updates
+```sh
+npm ci
+npm run typecheck
+npm test
+npm run build
+```
 
-HACS discovers updates from repository releases and tags. Users receive an update when a new semantic version tag is published and the release includes the matching built `computer-control-card.js` artifact. The distributed filename must continue to match `hacs.json` (`computer-control-card.js`).
+## HACS plugin requirements
+
+HACS installs this card from the built file named by `hacs.json`:
+
+```json
+{
+  "filename": "computer-control-card.js"
+}
+```
+
+Keep the built artifact at `dist/computer-control-card.js`. HACS discovers updates from semantic version tags and GitHub releases, so each published tag must have a corresponding full GitHub release with the built card asset attached.

@@ -256,7 +256,7 @@ The standalone demo uses fixtures and a mocked Home Assistant object. Tests and 
 
 ## Releasing / updates
 
-Release instructions live in [docs/releasing.md](docs/releasing.md). In short, use `npm run release:patch`, `npm run release:minor`, or `npm run release:major` to bump the package version and create a matching `vX.Y.Z` tag, then let the release workflow build and upload `dist/computer-control-card.js` for HACS users.
+Release instructions live in [docs/releasing.md](docs/releasing.md). This repository is published as a HACS **Dashboard/Lovelace plugin**, not a Home Assistant Python integration or custom template. Every accepted `main` update is patch-released as `vX.Y.Z` with the `Z` component incremented by one; the release workflow creates the matching tag, full GitHub release, and `dist/computer-control-card.js` asset for HACS users.
 
 - Build output is `dist/computer-control-card.js`; HACS uses the `filename` value in `hacs.json`.
 - HACS discovers updates from semantic version tags and GitHub releases.
