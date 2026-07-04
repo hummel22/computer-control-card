@@ -1,59 +1,76 @@
-# Computer Control Card
+# 🖥️ Computer Control Card
 
-A frontend-only Home Assistant Lovelace custom card for monitoring computer status, energy use, Wake-on-LAN, shutdown, and outlet controls from one dashboard tile.
-
-[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz/)
-[![Latest release](https://img.shields.io/github/v/release/hummel22/computer-control-card?sort=semver)](https://github.com/hummel22/computer-control-card/releases)
-[![Build and test](https://github.com/hummel22/computer-control-card/actions/workflows/ci.yml/badge.svg)](https://github.com/hummel22/computer-control-card/actions/workflows/ci.yml)
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-
-## Preview
-
-The card ships with compact and extended layouts so you can choose between dense dashboard summaries and a larger control surface.
+[![hacs][hacs-badge]][hacs-url]
+[![release][release-badge]][release-url]
+![downloads][downloads-badge]
+[![build][build-badge]][build-url]
+![license][license-badge]
 
 ![Compact design reference showing an ultra-compact Desktop PC control card with outlet, PC status, and system draw panels.](docs/assets/compact-design-reference.png)
 
-![Extended design reference showing a larger Desktop PC control card with status banner, metrics, machine actions, and power controls.](docs/assets/extended-design-reference.png)
+## What is Computer Control Card?
 
-> These images are design references for the intended compact and extended experiences. Use the standalone demo and screenshot tests when validating the current implementation.
+Computer Control Card is a frontend-only custom card for [Home Assistant][home-assistant] Dashboard UI.
 
-## Features
+Computer Control Card's mission is to provide an easy, focused dashboard tile for monitoring a computer and safely running common remote-control actions such as Wake-on-LAN, graceful shutdown, and outlet power control.
 
-- Monitor a computer summary entity, a dedicated online/status entity, outlet state, current power draw, and daily/monthly/total energy sensors.
-- Choose a `compact` dashboard card or an `extended` control panel.
-- Configure common fields through Home Assistant's dashboard visual editor.
-- Generate common actions from simple fields for Wake-on-LAN, shutdown, outlet on, and outlet off.
-- Override generated actions with custom Home Assistant service calls when your setup needs scripts, buttons, or integration-specific services.
-- Require confirmation before protected actions such as shutdown and hard outlet power-off.
-- Run and test locally without a live Home Assistant instance by using the standalone Vite demo and mocked `hass.callService`.
+### Features
+
+- 🛠 Dashboard UI editor for common options such as name, entities, Wake-on-LAN settings, actions targets, and layout variant.
+- 🖥 Computer-first status display with a main summary entity plus optional dedicated online/status, outlet, power, and energy entities.
+- ⚡ Energy and draw monitoring for current watts, daily energy, monthly energy, and lifetime energy.
+- 📦 Two layouts: a dense `compact` dashboard tile and an `extended` control panel.
+- 🚀 Generated actions from simple fields for Wake-on-LAN, shutdown, outlet on, and outlet off.
+- 🧩 Custom Home Assistant service actions when your setup needs scripts, buttons, helpers, or integration-specific services.
+- 🛡 Confirmation prompts for protected actions such as shutdown and hard outlet power-off.
+- 🧪 Standalone Vite demo, mocked Home Assistant object, unit tests, Playwright checks, and screenshot tests without a live Home Assistant instance.
+- 🌓 Light and dark theme support through standard Home Assistant card/theme variables.
+- 🌐 Frontend-only install: no custom Python integration, backend service, secrets, or real network devices are required for development or testing.
+
+The goal of Computer Control Card is not to replace full remote-desktop, device-management, or deep dashboard customization tools. For highly customized layouts, you can combine this card with other Lovelace cards such as [Button card][button-card] or dashboard frameworks such as [UI Lovelace Minimalist][ui-lovelace-minimalist].
 
 ## Installation
 
-### HACS installation
+### HACS
 
-This repository is ready to be installed as a HACS Dashboard/Lovelace custom repository. It includes `hacs.json`, renders this README in HACS, and publishes `computer-control-card.js` from the Vite build output.
+Computer Control Card is ready to install as a [HACS][hacs] Dashboard/Lovelace custom repository.
 
-Until the card is available in the default HACS repository list, add it as a custom repository:
+Use this link to directly go to the repository in HACS:
 
-1. In Home Assistant, open **HACS**.
-2. Open **⋮ > Custom repositories**.
-3. Add this repository URL.
-4. Select **Dashboard** (or **Lovelace** in older HACS versions) as the category.
-5. Install **Computer Control Card**.
-6. Refresh your browser or clear the Home Assistant frontend cache after installing or updating.
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=hummel22&repository=computer-control-card)
 
-HACS normally adds the dashboard resource automatically. If it does not, add the resource shown in [Dashboard resource setup](#dashboard-resource-setup).
+_or_
 
-### Manual installation
+1. Install HACS if you do not have it already.
+2. Open HACS in Home Assistant.
+3. Open **⋮ > Custom repositories**.
+4. Add this repository URL.
+5. Select **Dashboard** (or **Lovelace** in older HACS versions) as the category.
+6. Search for **Computer Control Card**.
+7. Click the download button. ⬇️
+8. Refresh your browser or clear the Home Assistant frontend cache after installing or updating.
 
-1. Download or build `computer-control-card.js`.
-2. Copy it to your Home Assistant `config/www` directory, for example:
+HACS normally adds the dashboard resource automatically. If it does not, add this resource manually:
 
-   ```text
-   config/www/computer-control-card.js
-   ```
+```yaml
+resources:
+  - url: /hacsfiles/computer-control-card/computer-control-card.js
+    type: module
+```
 
-3. Add `/local/computer-control-card.js` as a JavaScript module resource in Home Assistant.
+### Manual
+
+1. Download `computer-control-card.js` from the [latest release][release-url], or build it locally with `npm run build`.
+2. Put `computer-control-card.js` into your Home Assistant `config/www` folder.
+3. Add a reference to `computer-control-card.js` in Dashboard. There are two ways to do that:
+   - **Using UI:** _Settings_ → _Dashboards_ → _More Options icon_ → _Resources_ → _Add Resource_ → Set _Url_ as `/local/computer-control-card.js` → Set _Resource type_ as `JavaScript Module`.
+     **Note:** If you do not see the Resources menu, enable _Advanced Mode_ in your _User Profile_.
+   - **Using YAML:** Add the following code to the `lovelace` section.
+     ```yaml
+     resources:
+       - url: /local/computer-control-card.js
+         type: module
+     ```
 
 To build the file locally:
 
@@ -65,29 +82,23 @@ npm run build
 
 The production file is written to `dist/computer-control-card.js`.
 
-### Dashboard resource setup
+## Usage
 
-For HACS installs, use the HACS-managed resource path if Home Assistant does not add it automatically:
+Computer Control Card can be configured using the Home Assistant Dashboard UI editor for common options.
 
-```yaml
-resources:
-  - url: /hacsfiles/computer-control-card/computer-control-card.js
-    type: module
-```
+1. In Dashboard UI, click the three dots in the top right corner.
+2. Click _Edit Dashboard_.
+3. Click the plus button to add a new card.
+4. Find _Custom: Computer Control Card_ in the card list.
+5. Fill in your computer entities and action targets.
 
-For manual installs copied to `config/www`:
+### Cards
 
-```yaml
-resources:
-  - url: /local/computer-control-card.js
-    type: module
-```
+One card is available:
 
-You can also add the same resource through the Home Assistant UI: **Settings > Dashboards > ⋮ > Resources > Add Resource**. If the Resources menu is hidden, enable Advanced Mode in your Home Assistant user profile.
+- 🖥 [Computer Control Card](docs/cards/computer-control-card.md)
 
-## Configuration
-
-### Minimal YAML example
+### Basic configuration
 
 ```yaml
 type: custom:computer-control-card
@@ -98,13 +109,7 @@ variant: compact
 
 The configured `entity` is used as the main display state and as a source for optional summary attributes.
 
-### Visual editor support
-
-Home Assistant can show this card in the dashboard visual editor. The editor exposes common fields for the card title, display name, primary/status/power/energy entities, Wake-on-LAN settings, shutdown and outlet entities, and the compact or extended variant. The generated stub configuration starts with a compact card named `Computer`; add your own entities and action targets before saving it to a real dashboard.
-
-Advanced options such as custom `actions`, `outlet_actions`, thresholds, and custom confirmation handlers should still be edited in YAML.
-
-### Full YAML example
+### Full configuration
 
 ```yaml
 type: custom:computer-control-card
@@ -171,9 +176,7 @@ The card reads these optional attributes from the main `entity` when present:
 | `total_kwh`, `energy_total` | Fallback total energy when `energy_total_entity` is not configured. |
 | `trend`, `power_trend` | Compact system-draw detail text. |
 
-## Actions
-
-### Generated actions
+### Actions
 
 If you do not provide `actions`, the card generates common controls from first-class configuration fields:
 
@@ -182,10 +185,6 @@ If you do not provide `actions`, the card generates common controls from first-c
 - `shutdown_entity` creates a protected `button.press` action.
 - `outlet_entity` creates protected `switch.turn_on` and `switch.turn_off` actions.
 - `outlet_actions.turn_on` and `outlet_actions.turn_off` can override labels, icons, service data, or confirmation messages for the generated outlet actions.
-
-Generated first-class actions include only the service data required by that action.
-
-### Custom actions
 
 Use `actions` when you need full control over the Home Assistant service calls. Supplying `actions` replaces all generated actions, so include every button you want to show.
 
@@ -207,67 +206,84 @@ actions:
     service_data:
       entity_id: button.desktop_pc_shutdown
     confirmation: Shut down Desktop PC?
-  - key: outlet_on
-    label: Outlet On
-    icon: mdi:power-plug
-    domain: switch
-    service: turn_on
-    service_data:
-      entity_id: switch.desktop_pc_outlet
-  - key: outlet_off
-    label: Outlet Off
-    icon: mdi:power-plug-off
-    domain: switch
-    service: turn_off
-    service_data:
-      entity_id: switch.desktop_pc_outlet
-    confirmation: This immediately removes power from Desktop PC. Continue?
 ```
 
 Supported action keys are `wake`, `shutdown`, `outlet_on`, and `outlet_off`. For services that do not accept `entity_id`, route the operation through a Home Assistant script or button helper and point the action at that helper instead.
 
-## Development
+### Theme customization
 
-Install dependencies with the checked-in lockfile:
+Computer Control Card works without a custom theme and follows the standard Home Assistant card surface, text, divider, icon, and accent variables where possible. If you want more information about themes, check out the official [Home Assistant documentation about themes][home-assistant-theme-docs].
+
+## Development server
+
+### Standalone demo
+
+You can run the standalone Vite demo without a live Home Assistant instance:
+
+```sh
+npm run demo
+```
+
+Open the local Vite URL and browse to `/demo/`. The demo uses fixtures and a mocked Home Assistant object, so it must not call real Home Assistant services or real network devices.
+
+### Development
+
+Install dependencies and run the development server:
 
 ```sh
 corepack enable || true
 npm ci
+npm run dev
 ```
 
-Common commands:
+### Build
+
+You can build the `computer-control-card.js` file in the `dist` folder by running the build command.
 
 ```sh
 npm run build
+```
+
+### Tests and screenshots
+
+Run type checks, unit tests, and end-to-end tests with:
+
+```sh
 npm run typecheck
 npm test
+npm run test:e2e
+```
+
+Run standalone demo screenshot tests after UI-facing changes:
+
+```sh
 npm run screenshots
 ```
 
-Additional commands:
+Screenshot artifacts are written to `artifacts/screenshots/`, and Playwright reports are written to `artifacts/playwright-report/`.
 
-```sh
-npm run demo       # standalone Vite demo at /demo/
-npm run dev        # Vite development server
-npm run test:e2e   # full Playwright suite
-```
+### Releasing
 
-The standalone demo uses fixtures and a mocked Home Assistant object. Tests and demos must not call real Home Assistant services or real network devices.
+Release instructions live in [docs/releasing.md](docs/releasing.md). This repository is published as a HACS Dashboard/Lovelace plugin, and release assets include `dist/computer-control-card.js`.
 
-## Releasing / updates
+## Troubleshooting
 
-Release instructions live in [docs/releasing.md](docs/releasing.md). This repository is published as a HACS **Dashboard/Lovelace plugin**, not a Home Assistant Python integration or custom template. Every accepted `main` update is patch-released as `vX.Y.Z` with the `Z` component incremented by one; the release workflow creates the matching tag, full GitHub release, and `dist/computer-control-card.js` asset for HACS users.
+### I don't see the latest changes
 
-- Build output is `dist/computer-control-card.js`; HACS uses the `filename` value in `hacs.json`.
-- HACS discovers updates from semantic version tags and GitHub releases.
-- After a HACS update, reload Home Assistant and clear the browser cache if the old frontend bundle is still visible.
-- Manual installs should replace the copied `config/www/computer-control-card.js` file with the new build and then refresh the Home Assistant frontend.
+1. Check that you have the latest Computer Control Card version in HACS or from the [latest release][release-url].
+2. Check that Home Assistant is loading the expected dashboard resource path.
+3. Open the browser console and verify that `computer-control-card.js` is not blocked or cached from an older version.
+4. Clear your cache:
+   - Delete or update the dashboard resource if it points to an old file.
+   - Reinstall or redownload Computer Control Card.
+   - Hard-refresh the Home Assistant frontend.
 
-## Support
+### My action does not run
 
-- Open an issue with your card YAML, relevant entity states/attributes, browser console errors, and Home Assistant version.
-- Do not include secrets, real device credentials, or private network details in issues, screenshots, fixtures, or examples.
-- If an action does not run, verify the same service call works in Home Assistant Developer Tools first.
+1. Verify that the same service call works in Home Assistant Developer Tools.
+2. Confirm that your YAML uses the correct `domain`, `service`, and `service_data`.
+3. If the target service does not accept `entity_id`, route the operation through a Home Assistant script or button helper.
+4. Keep secrets, real device credentials, and private network details out of issues, fixtures, screenshots, and examples.
 
 ## Contributing
 
@@ -281,6 +297,29 @@ npm run screenshots
 
 If screenshots change intentionally, update the related artifacts or snapshots and mention the intentional visual update in your pull request.
 
+## Credits
+
+Computer Control Card is inspired by Home Assistant Dashboard patterns and the need for a safe, compact control surface for remotely managed computers.
+
 ## License
 
 MIT. See the repository license file for details.
+
+<!-- Badges -->
+
+[hacs-url]: https://github.com/hacs/integration
+[hacs-badge]: https://img.shields.io/badge/hacs-custom-orange.svg?style=flat-square
+[release-badge]: https://img.shields.io/github/v/release/hummel22/computer-control-card?style=flat-square
+[downloads-badge]: https://img.shields.io/github/downloads/hummel22/computer-control-card/total?style=flat-square
+[build-badge]: https://img.shields.io/github/actions/workflow/status/hummel22/computer-control-card/ci.yml?branch=main&style=flat-square
+[build-url]: https://github.com/hummel22/computer-control-card/actions/workflows/ci.yml
+[license-badge]: https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square
+
+<!-- References -->
+
+[home-assistant]: https://www.home-assistant.io/
+[home-assistant-theme-docs]: https://www.home-assistant.io/integrations/frontend/#defining-themes
+[hacs]: https://hacs.xyz
+[button-card]: https://github.com/custom-cards/button-card
+[ui-lovelace-minimalist]: https://ui-lovelace-minimalist.github.io/UI/
+[release-url]: https://github.com/hummel22/computer-control-card/releases
