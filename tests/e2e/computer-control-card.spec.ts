@@ -67,6 +67,34 @@ test.describe('Computer Control Card demo', () => {
     expect(consoleErrors).toEqual([]);
   });
 
+  test('reports grid rows large enough for rendered card content', async ({ page }) => {
+    await gotoDemo(page);
+
+    const measurements = await page.locator('[data-card-host="dashboard-medium"] computer-control-card').evaluateAll((elements) => elements.map((element) => {
+      const cardElement = element as HTMLElement & {
+        getCardSize: () => number;
+        getGridOptions: () => { columns: number; rows: number };
+      };
+      const variant = cardElement.dataset.variant;
+      const renderedHeight = cardElement.getBoundingClientRect().height;
+      return {
+        variant,
+        cardSize: cardElement.getCardSize(),
+        gridRows: cardElement.getGridOptions().rows,
+        renderedHeight,
+      };
+    }));
+
+    expect(measurements).toEqual(expect.arrayContaining([
+      expect.objectContaining({ variant: 'compact', cardSize: 5, gridRows: 5 }),
+      expect.objectContaining({ variant: 'extended', cardSize: 11, gridRows: 11 }),
+    ]));
+
+    for (const measurement of measurements) {
+      expect(measurement.gridRows * 56).toBeGreaterThanOrEqual(measurement.renderedHeight);
+    }
+  });
+
   test('compact signal clicks open the correct panels', async ({ page }) => {
     const consoleErrors = expectNoConsoleErrors(page);
     await gotoDemo(page);

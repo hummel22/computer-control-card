@@ -7,6 +7,10 @@ import type { ComputerControlActionConfig, ComputerControlActionKey, ComputerCon
 
 const CARD_TYPE = 'custom:computer-control-card';
 const DEFAULT_THRESHOLDS = { idleWatts: 10, activeWatts: 40 };
+const CARD_LAYOUT = {
+  compact: { columns: 6, rows: 5, cardSize: 5 },
+  extended: { columns: 12, rows: 11, cardSize: 11 },
+} as const;
 
 const CONFIG_FORM_SCHEMA: HomeAssistantFormSchema[] = [
   { name: 'title', selector: { text: {} } },
@@ -76,11 +80,12 @@ export class ComputerControlCard extends LitElement {
   }
 
   public getCardSize(): number {
-    return this._config?.variant === 'extended' ? 5 : 3;
+    return this._layout().cardSize;
   }
 
   public getGridOptions(): LovelaceGridOptions {
-    return this._config?.variant === 'extended' ? { columns: 12, rows: 5 } : { columns: 6, rows: 3 };
+    const { columns, rows } = this._layout();
+    return { columns, rows };
   }
 
   protected override render() {
@@ -111,6 +116,10 @@ export class ComputerControlCard extends LitElement {
           : this._renderCompact(entity, outletEntity, powerEntity, energyTodayEntity, energyMonthEntity, energyTotalEntity, displayName, status)}
       </ha-card>
     `;
+  }
+
+  private _layout() {
+    return this._config?.variant === 'extended' ? CARD_LAYOUT.extended : CARD_LAYOUT.compact;
   }
 
   private _renderCompact(
