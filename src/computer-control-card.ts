@@ -412,7 +412,7 @@ export class ComputerControlCard extends LitElement {
       outlet_off: 'Outlet off',
       online: 'Online',
       offline_standby: 'Offline standby',
-      booting_or_service_unavailable: 'Booting or service unavailable',
+      booting_or_service_unavailable: 'Booting',
       unknown: 'Unknown',
     };
     return labels[state];

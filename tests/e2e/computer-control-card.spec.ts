@@ -22,7 +22,7 @@ const expectedStatusLabels: Record<(typeof fixtureStates)[number], string> = {
   online: 'Online',
   outlet_off: 'Outlet off',
   offline_standby: 'Offline standby',
-  booting_or_service_unavailable: 'Booting or service unavailable',
+  booting_or_service_unavailable: 'Booting',
   status_unavailable: 'Unknown',
   power_unavailable: 'Unknown',
   missing_optional_entities: 'Unknown',
