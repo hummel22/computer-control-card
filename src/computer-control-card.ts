@@ -3,24 +3,61 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { buildDefaultActions } from './actions';
 import { deriveComputerState, getDisplayName, getEntity } from './state';
 import { styles } from './styles';
-import type { ComputerControlActionConfig, ComputerControlActionKey, ComputerControlCardConfig, ComputerControlConfirmationHandler, HassEntity, HomeAssistant, HomeAssistantFormSchema, LovelaceCardConfig, LovelaceGridOptions } from './types';
+import type { ComputerControlActionConfig, ComputerControlActionKey, ComputerControlCardConfig, ComputerControlConfirmationHandler, HassEntity, HomeAssistant, HomeAssistantConfigForm, HomeAssistantFormSchema, LovelaceCardConfig, LovelaceGridOptions } from './types';
 
 const CARD_TYPE = 'custom:computer-control-card';
 const DEFAULT_THRESHOLDS = { idleWatts: 10, activeWatts: 40 };
+
+const CONFIG_FORM_LABELS: Record<string, string> = {
+  title: 'Card header',
+  name: 'Computer name',
+  entity: 'Summary entity',
+  status_entity: 'Status entity',
+  power_entity: 'Power entity',
+  energy_today_entity: 'Energy today entity',
+  energy_month_entity: 'Energy month entity',
+  energy_total_entity: 'Energy total entity',
+  wol_mac: 'Wake-on-LAN MAC address',
+  broadcast_address: 'Wake-on-LAN broadcast address',
+  shutdown_entity: 'Shutdown button entity',
+  outlet_entity: 'Outlet switch entity',
+  variant: 'Layout variant',
+  thresholds: 'Power thresholds',
+  idleWatts: 'Idle watts',
+  activeWatts: 'Active watts',
+  outlet_actions: 'Generated outlet action overrides',
+  actions: 'Fully custom action list',
+};
+
+const CONFIG_FORM_HELPERS: Record<string, string> = {
+  entity: 'Main entity used for the display state and fallback metric attributes.',
+  status_entity: 'Optional online/status entity, for example a binary sensor.',
+  power_entity: 'Optional current power draw sensor, usually measured in watts.',
+  energy_today_entity: 'Optional daily energy sensor. If unset, the card falls back to summary attributes.',
+  energy_month_entity: 'Optional monthly energy sensor. If unset, the card falls back to summary attributes.',
+  energy_total_entity: 'Optional lifetime/total energy sensor.',
+  wol_mac: 'Optional MAC address used to generate the Wake PC action.',
+  broadcast_address: 'Optional broadcast address for wake_on_lan.send_magic_packet.',
+  shutdown_entity: 'Optional button entity used to generate a protected shutdown action.',
+  outlet_entity: 'Optional switch entity used to generate protected outlet on/off actions.',
+  thresholds: 'Optional values used with status and power entities to derive standby, online, and booting states.',
+  outlet_actions: 'Optional YAML object for turn_on/turn_off overrides such as icon, label, service_data, or confirmation.',
+  actions: 'Optional YAML array of complete custom actions. When supplied, it replaces generated actions.',
+};
 
 const CONFIG_FORM_SCHEMA: HomeAssistantFormSchema[] = [
   { name: 'title', selector: { text: {} } },
   { name: 'name', selector: { text: {} } },
   { name: 'entity', selector: { entity: {} } },
   { name: 'status_entity', selector: { entity: {} } },
-  { name: 'power_entity', selector: { entity: {} } },
-  { name: 'energy_today_entity', selector: { entity: {} } },
-  { name: 'energy_month_entity', selector: { entity: {} } },
-  { name: 'energy_total_entity', selector: { entity: {} } },
+  { name: 'power_entity', selector: { entity: { domain: 'sensor' } } },
+  { name: 'energy_today_entity', selector: { entity: { domain: 'sensor' } } },
+  { name: 'energy_month_entity', selector: { entity: { domain: 'sensor' } } },
+  { name: 'energy_total_entity', selector: { entity: { domain: 'sensor' } } },
   { name: 'wol_mac', selector: { text: {} } },
   { name: 'broadcast_address', selector: { text: {} } },
-  { name: 'shutdown_entity', selector: { entity: {} } },
-  { name: 'outlet_entity', selector: { entity: {} } },
+  { name: 'shutdown_entity', selector: { entity: { domain: 'button' } } },
+  { name: 'outlet_entity', selector: { entity: { domain: 'switch' } } },
   {
     name: 'variant',
     selector: {
@@ -32,6 +69,16 @@ const CONFIG_FORM_SCHEMA: HomeAssistantFormSchema[] = [
       },
     },
   },
+  {
+    type: 'grid',
+    name: 'thresholds',
+    schema: [
+      { name: 'idleWatts', selector: { number: { min: 0, mode: 'box', step: 1, unit_of_measurement: 'W' } } },
+      { name: 'activeWatts', selector: { number: { min: 0, mode: 'box', step: 1, unit_of_measurement: 'W' } } },
+    ],
+  },
+  { name: 'outlet_actions', selector: { object: {} } },
+  { name: 'actions', selector: { object: {} } },
 ];
 type PanelKey = 'outlet' | 'pc' | 'draw';
 type MetricValue = { present: true; value: string } | { present: false; value: string };
@@ -40,8 +87,12 @@ type MetricValue = { present: true; value: string } | { present: false; value: s
 export class ComputerControlCard extends LitElement {
   static override styles = styles;
 
-  public static getConfigForm(): HomeAssistantFormSchema[] {
-    return CONFIG_FORM_SCHEMA;
+  public static getConfigForm(): HomeAssistantConfigForm {
+    return {
+      schema: CONFIG_FORM_SCHEMA,
+      computeLabel: (schema) => CONFIG_FORM_LABELS[schema.name],
+      computeHelper: (schema) => CONFIG_FORM_HELPERS[schema.name],
+    };
   }
 
   public static getStubConfig(): Omit<ComputerControlCardConfig, 'type'> {

@@ -18,15 +18,27 @@ export interface LovelaceCardConfig {
 }
 
 export type HomeAssistantSelector =
-  | { entity: Record<string, never> }
-  | { text: Record<string, never> }
-  | { select: { options: Array<{ label: string; value: string }> } };
+  | { entity: Record<string, unknown> }
+  | { text: Record<string, unknown> }
+  | { select: { options: Array<{ label: string; value: string }> } }
+  | { number: { min?: number; mode?: 'box' | 'slider'; step?: number; unit_of_measurement?: string } }
+  | { object: Record<string, never> };
 
-export interface HomeAssistantFormSchema {
+export interface HomeAssistantFormSchemaBase {
   name: string;
   label?: string;
   required?: boolean;
-  selector: HomeAssistantSelector;
+  selector?: HomeAssistantSelector;
+  schema?: HomeAssistantFormSchema[];
+  type?: 'grid' | 'expandable';
+}
+
+export type HomeAssistantFormSchema = HomeAssistantFormSchemaBase;
+
+export interface HomeAssistantConfigForm {
+  schema: HomeAssistantFormSchema[];
+  computeLabel?: (schema: HomeAssistantFormSchema) => string | undefined;
+  computeHelper?: (schema: HomeAssistantFormSchema) => string | undefined;
 }
 
 export interface LovelaceGridOptions {
