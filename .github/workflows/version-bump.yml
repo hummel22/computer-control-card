@@ -42,7 +42,13 @@ jobs:
 
       - name: Read release version
         id: package-version
-        run: echo "version=$(node -p 'require(\"./package.json\").version')" >> "$GITHUB_OUTPUT"
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+
+      - name: Verify release tag was created
+        run: test -n "$VERSION" && git rev-parse --verify "refs/tags/v${VERSION}"
 
       - name: Typecheck
         run: npm run typecheck
@@ -60,9 +66,7 @@ jobs:
           test -f "dist/$(node -p "require('./hacs.json').filename")"
 
       - name: Push version bump commit and tag
-        run: |
-          git push origin HEAD:main
-          git push origin v${{ steps.package-version.outputs.version }}
+        run: git push --atomic origin HEAD:main "v${VERSION}"
 
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
