@@ -1,4 +1,4 @@
-name: Version bump
+name: Version bump and release
 
 on:
   push:
@@ -10,8 +10,8 @@ permissions:
   contents: write
 
 jobs:
-  bump-version:
-    name: Bump package version after main updates
+  release-main:
+    name: Bump patch version and publish release
     runs-on: ubuntu-latest
     if: github.actor != 'github-actions[bot]'
 
@@ -28,14 +28,42 @@ jobs:
           node-version: 22
           cache: npm
 
+      - name: Install dependencies
+        run: npm ci
+
       - name: Configure Git author
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Bump patch version and create tag
+        run: npm version patch -m "chore(release): v%s"
+
+      - name: Read release version
+        id: package-version
+        run: echo "version=$(node -p 'require(\"./package.json\").version')" >> "$GITHUB_OUTPUT"
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build release artifact
+        run: npm run build
+
+      - name: Verify HACS release artifact
         run: |
-          npm version patch -m "chore(release): v%s"
+          test -f hacs.json
+          test "$(node -p "require('./hacs.json').filename")" = "computer-control-card.js"
+          test -f "dist/$(node -p "require('./hacs.json').filename")"
 
       - name: Push version bump commit and tag
         run: git push --follow-tags
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.package-version.outputs.version }}
+          files: dist/computer-control-card.js
+          generate_release_notes: true
