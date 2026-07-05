@@ -85,6 +85,8 @@ const CONFIG_FORM_SCHEMA: HomeAssistantFormSchema[] = [
   { name: 'actions', selector: { object: {} } },
 ];
 type PanelKey = 'outlet' | 'pc' | 'draw';
+type SignalState = 'on' | 'off' | 'stale' | 'unknown';
+type ActionTone = 'positive' | 'negative';
 type MetricValue = { present: true; value: string } | { present: false; value: string };
 
 @customElement('computer-control-card')
@@ -201,9 +203,9 @@ export class ComputerControlCard extends LitElement {
           </div>
         </div>
         <div class="signal-row">
-          ${this._renderSignal('outlet', 'Power Outlet', this._outletStatus(entity, outletEntity), 'mdi:power-plug')}
-          ${this._renderSignal('pc', 'PC Status', status, 'mdi:desktop-tower')}
-          ${this._renderSignal('draw', 'System Draw', this._powerMetric(entity, powerEntity), 'mdi:flash')}
+          ${this._renderSignal('outlet', 'Power Outlet', this._outletStatus(entity, outletEntity), 'mdi:power-plug', this._entityOnOffState(outletEntity))}
+          ${this._renderSignal('pc', 'PC Status', status, 'mdi:desktop-tower', this._pcSignalState(status))}
+          ${this._renderSignal('draw', 'System Draw', this._powerMetric(entity, powerEntity), 'mdi:flash', this._powerSignalState(powerEntity))}
         </div>
         ${this._activePanel ? this._renderPanel(this._activePanel, entity, energyTodayEntity, energyMonthEntity, energyTotalEntity, status) : nothing}
         ${this._renderConfirmationDialog()}
@@ -243,15 +245,15 @@ export class ComputerControlCard extends LitElement {
         <section>
           <h3>Machine Actions</h3>
           <div class="action-pair">
-            ${this._renderActionButton('Shutdown', 'mdi:power-off', this._findAction('shutdown'))}
-            ${this._renderActionButton('Wake PC', 'mdi:power', this._findAction('wake'))}
+            ${this._renderActionButton('Shutdown', 'mdi:power-off', this._findAction('shutdown'), 'negative')}
+            ${this._renderActionButton('Wake PC', 'mdi:power', this._findAction('wake'), 'positive')}
           </div>
         </section>
         <section>
           <h3>Power Controls</h3>
           <div class="action-pair">
-            ${this._renderActionButton('Outlet On', 'mdi:power-plug', this._findAction('outlet_on'))}
-            ${this._renderActionButton('Outlet Off', 'mdi:power-plug-off', this._findAction('outlet_off'))}
+            ${this._renderActionButton('Outlet On', 'mdi:power-plug', this._findAction('outlet_on'), 'positive')}
+            ${this._renderActionButton('Outlet Off', 'mdi:power-plug-off', this._findAction('outlet_off'), 'negative')}
           </div>
         </section>
         <div class="note">Protected actions require confirmation before they run.</div>
@@ -260,10 +262,9 @@ export class ComputerControlCard extends LitElement {
     `;
   }
 
-  private _renderSignal(key: PanelKey, label: string, value: string, icon: string) {
-    return html`<button class="signal" type="button" data-panel=${key} @click=${() => (this._activePanel = this._activePanel === key ? undefined : key)}>
+  private _renderSignal(key: PanelKey, label: string, value: string, icon: string, state: SignalState) {
+    return html`<button class=${`signal ${state}`} type="button" data-panel=${key} aria-label=${`${label}: ${value}`} title=${label} @click=${() => (this._activePanel = this._activePanel === key ? undefined : key)}>
       <ha-icon .icon=${icon}></ha-icon>
-      <span>${label}</span>
       <strong>${value}</strong>
     </button>`;
   }
@@ -341,9 +342,9 @@ export class ComputerControlCard extends LitElement {
     `;
   }
 
-  private _renderActionButton(label: string, icon: string, action: ComputerControlActionConfig | undefined) {
+  private _renderActionButton(label: string, icon: string, action: ComputerControlActionConfig | undefined, tone?: ActionTone) {
     return html`
-      <button type="button" ?disabled=${!this.hass || !action} @click=${() => action && this._handleAction(action)}>
+      <button class=${tone ? `action-${tone}` : nothing} type="button" ?disabled=${!this.hass || !action} @click=${() => action && this._handleAction(action)}>
         <ha-icon .icon=${action?.icon ?? icon}></ha-icon>
         <span>${action?.label ?? label}</span>
       </button>
@@ -400,6 +401,37 @@ export class ComputerControlCard extends LitElement {
     return this._metric(entity, ['power', 'system_draw', 'draw_w'], '— W');
   }
 
+
+  private _entityOnOffState(entity: HassEntity | undefined): SignalState {
+    if (!entity) {
+      return 'unknown';
+    }
+
+    return entity.state.toLowerCase() === 'on' ? 'on' : 'off';
+  }
+
+  private _pcSignalState(status: string): SignalState {
+    return status.toLowerCase() === 'online' ? 'on' : 'off';
+  }
+
+  private _powerSignalState(powerEntity: HassEntity | undefined): SignalState {
+    if (!this._config?.power_entity) {
+      return 'unknown';
+    }
+
+    if (!powerEntity || powerEntity.state === 'unavailable' || powerEntity.state === 'unknown') {
+      return 'stale';
+    }
+
+    const lastUpdated = powerEntity.last_updated ? Date.parse(powerEntity.last_updated) : Number.NaN;
+    if (!Number.isFinite(lastUpdated)) {
+      return 'stale';
+    }
+
+    const oneHourMs = 60 * 60 * 1000;
+    return Date.now() - lastUpdated <= oneHourMs ? 'on' : 'stale';
+  }
+
   private _thresholds() {
     return {
       idleWatts: this._config?.thresholds?.idleWatts ?? DEFAULT_THRESHOLDS.idleWatts,
@@ -411,7 +443,7 @@ export class ComputerControlCard extends LitElement {
     const labels: Record<ReturnType<typeof deriveComputerState>, string> = {
       outlet_off: 'Outlet off',
       online: 'Online',
-      offline_standby: 'Offline standby',
+      offline_standby: 'Offline',
       booting_or_service_unavailable: 'Booting',
       unknown: 'Unknown',
     };
