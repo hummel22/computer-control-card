@@ -21,7 +21,7 @@ import {
 const expectedStatusLabels: Record<(typeof fixtureStates)[number], string> = {
   online: 'Online',
   outlet_off: 'Outlet off',
-  offline_standby: 'Offline standby',
+  offline_standby: 'Offline',
   booting_or_service_unavailable: 'Booting',
   status_unavailable: 'Unknown',
   power_unavailable: 'Unknown',
@@ -44,6 +44,9 @@ test.describe('Computer Control Card demo', () => {
       await expect(compact.locator('.compact-shell')).toBeVisible();
       await expect(compact.locator('.status-pill')).toHaveText(expectedStatusLabels[fixture]);
       await expect(signal(page, 'pc')).toContainText(expectedStatusLabels[fixture]);
+      await expect(signal(page, 'outlet').locator('span')).toHaveCount(0);
+      await expect(signal(page, 'pc').locator('span')).toHaveCount(0);
+      await expect(signal(page, 'draw').locator('span')).toHaveCount(0);
       await screenshot(compact, `compact-${fixture}`);
     }
 
@@ -117,6 +120,27 @@ test.describe('Computer Control Card demo', () => {
     await expect(drawPanel).toContainText(/Month|— kWh/);
 
     expect(consoleErrors).toEqual([]);
+  });
+
+
+  test('compact signals and extended actions use state colors', async ({ page }) => {
+    await gotoDemo(page);
+
+    await expect(signal(page, 'outlet')).toHaveClass(/on/);
+    await expect(signal(page, 'pc')).toHaveClass(/on/);
+    await expect(signal(page, 'draw')).toHaveClass(/on/);
+    await expect(card(page, 'extended').locator('button.action-positive')).toHaveCount(2);
+    await expect(card(page, 'extended').locator('button.action-negative')).toHaveCount(2);
+
+    await selectFixture(page, 'outlet_off');
+    await expect(signal(page, 'outlet')).toHaveClass(/off/);
+    await expect(signal(page, 'pc')).toHaveClass(/off/);
+
+    await selectFixture(page, 'power_unavailable');
+    await expect(signal(page, 'draw')).toHaveClass(/stale/);
+
+    await configureDashboardCard(page, 'compact', { power_entity: undefined });
+    await expect(signal(page, 'draw')).toHaveClass(/unknown/);
   });
 
   test('Wake PC calls wake_on_lan.send_magic_packet with configured MAC and broadcast address', async ({ page }) => {

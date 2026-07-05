@@ -103,6 +103,18 @@ export const styles = css`
     min-height: 92px;
   }
 
+  .signal ha-icon {
+    color: var(--disabled-text-color, #9b9b9b);
+  }
+
+  .signal.on ha-icon {
+    color: var(--success-color, #43a047);
+  }
+
+  .signal.stale ha-icon {
+    color: var(--error-color, #db4437);
+  }
+
   .signal strong,
   .metric strong,
   .status-banner strong {
@@ -206,6 +218,24 @@ export const styles = css`
   button:hover:not(:disabled) {
     background: var(--primary-color);
     color: var(--text-primary-color, #fff);
+  }
+
+  button.action-positive:not(:disabled) ha-icon {
+    color: var(--success-color, #43a047);
+  }
+
+  button.action-negative:not(:disabled) ha-icon {
+    color: var(--error-color, #db4437);
+  }
+
+  button.action-positive:hover:not(:disabled),
+  button.action-negative:hover:not(:disabled) {
+    color: var(--text-primary-color, #fff);
+  }
+
+  button.action-positive:hover:not(:disabled) ha-icon,
+  button.action-negative:hover:not(:disabled) ha-icon {
+    color: currentcolor;
   }
 
   button:disabled {
