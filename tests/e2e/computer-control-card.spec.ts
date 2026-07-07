@@ -11,6 +11,7 @@ import {
   fixtureStates,
   gotoDemo,
   outletEntity,
+  powerEntity,
   selectFixture,
   shutdownEntity,
   signal,
@@ -89,7 +90,7 @@ test.describe('Computer Control Card demo', () => {
     }));
 
     expect(measurements).toEqual(expect.arrayContaining([
-      expect.objectContaining({ variant: 'compact', cardSize: 5, gridRows: 5 }),
+      expect.objectContaining({ variant: 'compact', cardSize: 8, gridRows: 8 }),
       expect.objectContaining({ variant: 'extended', cardSize: 11, gridRows: 11 }),
     ]));
 
@@ -98,23 +99,23 @@ test.describe('Computer Control Card demo', () => {
     }
   });
 
-  test('compact signal clicks open the correct panels', async ({ page }) => {
+  test('compact signal clicks switch the bubble panel', async ({ page }) => {
     const consoleErrors = expectNoConsoleErrors(page);
     await gotoDemo(page);
 
     await signal(page, 'outlet').click();
-    await expect(card(page, 'compact').locator('.popover')).toContainText('Power Outlet');
+    await expect(card(page, 'compact').locator('.bubble-panel')).toContainText('Power Outlet');
     await expect(actionButton(card(page, 'compact'), 'Outlet On')).toBeVisible();
     await expect(actionButton(card(page, 'compact'), 'Outlet Off')).toBeVisible();
 
     await signal(page, 'pc').click();
-    await expect(card(page, 'compact').locator('.popover')).toContainText('PC Status');
+    await expect(card(page, 'compact').locator('.bubble-panel')).toContainText('PC Status');
     await expect(actionButton(card(page, 'compact'), 'Wake PC')).toBeVisible();
     await expect(actionButton(card(page, 'compact'), 'Shutdown')).toBeVisible();
 
     await signal(page, 'draw').click();
-    const drawPanel = card(page, 'compact').locator('.popover');
-    await expect(drawPanel).toContainText('System Draw');
+    const drawPanel = card(page, 'compact').locator('.bubble-panel');
+    await expect(drawPanel).toContainText('Power');
     await expect(drawPanel).toContainText(/Now|— W/);
     await expect(drawPanel).toContainText(/Today|— kWh/);
     await expect(drawPanel).toContainText(/Month|— kWh/);
@@ -122,6 +123,23 @@ test.describe('Computer Control Card demo', () => {
     expect(consoleErrors).toEqual([]);
   });
 
+  test('compact power bubble items open Home Assistant history more-info', async ({ page }) => {
+    const consoleErrors = expectNoConsoleErrors(page);
+    await gotoDemo(page);
+
+    await page.evaluate(() => {
+      window.addEventListener('hass-more-info', ((event: Event) => {
+        const customEvent = event as CustomEvent<{ entityId: string }>;
+        document.body.dataset.moreInfoEntity = customEvent.detail.entityId;
+      }) as EventListener);
+    });
+
+    await expect(signal(page, 'draw')).toHaveAttribute('aria-pressed', 'true');
+    await card(page, 'compact').locator('.bubble-panel .metric.history-metric').filter({ hasText: 'Now' }).click();
+    await expect(page.locator('body')).toHaveAttribute('data-more-info-entity', powerEntity);
+
+    expect(consoleErrors).toEqual([]);
+  });
 
   test('compact signals and extended actions use state colors', async ({ page }) => {
     await gotoDemo(page);
@@ -223,7 +241,7 @@ test.describe('Computer Control Card demo', () => {
     await expect(metrics.locator('.metric').filter({ hasText: 'Month' })).toHaveText(/Month\s*84\.6 kWh/);
 
     await signal(page, 'draw').click();
-    const drawPanel = card(page, 'compact').locator('.popover');
+    const drawPanel = card(page, 'compact').locator('.bubble-panel');
     await expect(drawPanel.locator('.metric').filter({ hasText: 'Today' })).toHaveText(/Today\s*2\.8 kWh/);
     await expect(drawPanel.locator('.metric').filter({ hasText: 'Month' })).toHaveText(/Month\s*84\.6 kWh/);
 
@@ -285,8 +303,8 @@ test.describe('Computer Control Card demo', () => {
     await expect(actionButton(card(page, 'compact'), 'Shutdown')).toBeDisabled();
 
     await signal(page, 'draw').click();
-    const drawPanel = card(page, 'compact').locator('.popover');
-    await expect(drawPanel).toContainText('System Draw');
+    const drawPanel = card(page, 'compact').locator('.bubble-panel');
+    await expect(drawPanel).toContainText('Power');
     await expect(drawPanel.locator('.metric.unavailable').filter({ hasText: 'Today' })).toHaveText(/Today\s*Unavailable/);
     await expect(drawPanel.locator('.metric.unavailable').filter({ hasText: 'Month' })).toHaveText(/Month\s*Unavailable/);
     await expect(drawPanel).not.toContainText('— kWh');
@@ -307,11 +325,11 @@ test.describe('Computer Control Card demo', () => {
     await card(page, 'extended').screenshot({ path: 'artifacts/screenshots/extended-online.png' });
 
     await signal(page, 'outlet').click();
-    await card(page, 'compact').screenshot({ path: 'artifacts/screenshots/compact-popover-outlet.png' });
+    await card(page, 'compact').screenshot({ path: 'artifacts/screenshots/compact-bubbles-outlet.png' });
     await signal(page, 'pc').click();
-    await card(page, 'compact').screenshot({ path: 'artifacts/screenshots/compact-popover-pc-status.png' });
+    await card(page, 'compact').screenshot({ path: 'artifacts/screenshots/compact-bubbles-pc-status.png' });
     await signal(page, 'draw').click();
-    await card(page, 'compact').screenshot({ path: 'artifacts/screenshots/compact-popover-system-draw.png' });
+    await card(page, 'compact').screenshot({ path: 'artifacts/screenshots/compact-bubbles-system-draw.png' });
 
     await selectFixture(page, 'outlet_off');
     await card(page, 'compact').screenshot({ path: 'artifacts/screenshots/compact-outlet-off.png' });
