@@ -8,7 +8,7 @@ import type { ComputerControlActionConfig, ComputerControlActionKey, ComputerCon
 const CARD_TYPE = 'custom:computer-control-card';
 const DEFAULT_THRESHOLDS = { idleWatts: 10, activeWatts: 40 };
 const CARD_LAYOUT = {
-  compact: { columns: 6, rows: 5, cardSize: 5 },
+  compact: { columns: 6, rows: 8, cardSize: 8 },
   extended: { columns: 12, rows: 11, cardSize: 11 },
 } as const;
 
@@ -115,7 +115,7 @@ export class ComputerControlCard extends LitElement {
   private _config?: ComputerControlCardConfig;
 
   @state()
-  private _activePanel: PanelKey | undefined;
+  private _activePanel: PanelKey = 'draw';
 
   @state()
   private _pendingConfirmation: ComputerControlActionConfig | undefined;
@@ -207,7 +207,7 @@ export class ComputerControlCard extends LitElement {
           ${this._renderSignal('pc', 'PC Status', status, 'mdi:desktop-tower', this._pcSignalState(status))}
           ${this._renderSignal('draw', 'System Draw', this._powerMetric(entity, powerEntity), 'mdi:flash', this._powerSignalState(powerEntity))}
         </div>
-        ${this._activePanel ? this._renderPanel(this._activePanel, entity, energyTodayEntity, energyMonthEntity, energyTotalEntity, status) : nothing}
+        ${this._renderPanel(this._activePanel, entity, energyTodayEntity, energyMonthEntity, energyTotalEntity, status)}
         ${this._renderConfirmationDialog()}
       </div>
     `;
@@ -263,7 +263,7 @@ export class ComputerControlCard extends LitElement {
   }
 
   private _renderSignal(key: PanelKey, label: string, value: string, icon: string, state: SignalState) {
-    return html`<button class=${`signal ${state}`} type="button" data-panel=${key} aria-label=${`${label}: ${value}`} title=${label} @click=${() => (this._activePanel = this._activePanel === key ? undefined : key)}>
+    return html`<button class=${`signal ${state}${this._activePanel === key ? ' selected' : ''}`} type="button" data-panel=${key} aria-label=${`${label}: ${value}`} title=${label} aria-pressed=${this._activePanel === key} @click=${() => (this._activePanel = key)}>
       <ha-icon .icon=${icon}></ha-icon>
       <strong>${value}</strong>
     </button>`;
@@ -279,47 +279,54 @@ export class ComputerControlCard extends LitElement {
   ) {
     if (key === 'outlet') {
       return html`
-        <div class="popover">
-          <h3>Power Outlet</h3>
-          <p>Current outlet status: <strong>${this._outletStatus(entity, getEntity(this.hass, this._config?.outlet_entity))}</strong></p>
-          <div class="action-pair">
+        <section class="bubble-panel" aria-live="polite">
+          <div class="bubble-panel-heading">
+            <h3>Power Outlet</h3>
+            <span>${this._outletStatus(entity, getEntity(this.hass, this._config?.outlet_entity))}</span>
+          </div>
+          <div class="bubble-grid">
             ${this._renderActionButton('Outlet On', 'mdi:power-plug', this._findAction('outlet_on'))}
             ${this._renderActionButton('Outlet Off', 'mdi:power-plug-off', this._findAction('outlet_off'))}
           </div>
-          <div class="warning">Hard power cuts can cause data loss. Use only when graceful controls are unavailable.</div>
-        </div>
+          <div class="warning">Hard power cuts can cause data loss.</div>
+        </section>
       `;
     }
     if (key === 'pc') {
       return html`
-        <div class="popover">
-          <h3>PC Status</h3>
-          <p>Current PC status: <strong>${status}</strong></p>
-          <div class="action-pair">
+        <section class="bubble-panel" aria-live="polite">
+          <div class="bubble-panel-heading">
+            <h3>PC Status</h3>
+            <span>${status}</span>
+          </div>
+          <div class="bubble-grid">
             ${this._renderActionButton('Wake PC', 'mdi:power', this._findAction('wake'))}
             ${this._renderActionButton('Shutdown', 'mdi:power-off', this._findAction('shutdown'))}
           </div>
           <div class="warning">Shutdown is intended to be graceful and may take time to complete.</div>
-        </div>
+        </section>
       `;
     }
     return html`
-      <div class="popover">
-        <h3>System Draw</h3>
-        <div class="metric-row">
-          ${this._renderMetric('Now', this._powerMetric(entity, getEntity(this.hass, this._config?.power_entity)))}
-          ${this._renderMetric('Today', this._entityMetricValue(energyTodayEntity, entity, ['today_kwh', 'energy_today']))}
-          ${this._renderMetric('Month', this._entityMetricValue(energyMonthEntity, entity, ['month_kwh', 'energy_month']))}
-          ${energyTotalEntity ? this._renderMetric('Total', this._entityMetricValue(energyTotalEntity, entity, ['total_kwh', 'energy_total'])) : nothing}
+      <section class="bubble-panel" aria-live="polite">
+        <div class="bubble-panel-heading">
+          <h3>Power</h3>
+          <span>${this._metric(entity, ['trend', 'power_trend'], status)}</span>
         </div>
-        <div class="trend">${this._metric(entity, ['trend', 'power_trend'], status)}</div>
-      </div>
+        <div class="bubble-grid power-bubbles">
+          ${this._renderMetric('Now', this._powerMetric(entity, getEntity(this.hass, this._config?.power_entity)), this._config?.power_entity)}
+          ${this._renderMetric('Today', this._entityMetricValue(energyTodayEntity, entity, ['today_kwh', 'energy_today']), this._config?.energy_today_entity)}
+          ${this._renderMetric('Month', this._entityMetricValue(energyMonthEntity, entity, ['month_kwh', 'energy_month']), this._config?.energy_month_entity)}
+          ${energyTotalEntity ? this._renderMetric('Total', this._entityMetricValue(energyTotalEntity, entity, ['total_kwh', 'energy_total']), this._config?.energy_total_entity) : nothing}
+        </div>
+      </section>
     `;
   }
 
-  private _renderMetric(label: string, metric: string | MetricValue) {
+  private _renderMetric(label: string, metric: string | MetricValue, historyEntityId?: string) {
     const normalized = typeof metric === 'string' ? { present: true, value: metric } : metric;
-    return html`<div class=${`metric${normalized.present ? '' : ' unavailable'}`} aria-disabled=${normalized.present ? nothing : 'true'}><span>${label}</span><strong>${normalized.value}</strong></div>`;
+    const showHistory = Boolean(historyEntityId && normalized.present);
+    return html`<button class=${`metric${normalized.present ? '' : ' unavailable'}${showHistory ? ' history-metric' : ''}`} type="button" ?disabled=${!showHistory} aria-disabled=${normalized.present ? nothing : 'true'} @click=${() => historyEntityId && normalized.present && this._showMoreInfo(historyEntityId)}><span>${label}</span><strong>${normalized.value}</strong></button>`;
   }
 
   private _renderConfirmationDialog() {
@@ -401,6 +408,14 @@ export class ComputerControlCard extends LitElement {
     return this._metric(entity, ['power', 'system_draw', 'draw_w'], '— W');
   }
 
+
+  private _showMoreInfo(entityId: string): void {
+    this.dispatchEvent(new CustomEvent('hass-more-info', {
+      bubbles: true,
+      composed: true,
+      detail: { entityId },
+    }));
+  }
 
   private _entityOnOffState(entity: HassEntity | undefined): SignalState {
     if (!entity) {

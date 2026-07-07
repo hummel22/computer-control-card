@@ -111,6 +111,11 @@ export const styles = css`
     color: var(--success-color, #43a047);
   }
 
+  .signal.selected {
+    background: color-mix(in srgb, var(--primary-color) 18%, var(--secondary-background-color, #f4f4f4));
+    border-color: color-mix(in srgb, var(--primary-color) 42%, var(--divider-color));
+  }
+
   .signal.stale ha-icon {
     color: var(--error-color, #db4437);
   }
@@ -130,7 +135,6 @@ export const styles = css`
     width: 38px;
   }
 
-  .popover,
   .status-banner,
   .metric,
   section,
@@ -139,12 +143,6 @@ export const styles = css`
     border: 1px solid var(--divider-color, transparent);
     border-radius: 18px;
     padding: 14px;
-  }
-
-  .popover {
-    box-shadow: var(--ha-card-box-shadow, 0 4px 16px rgb(0 0 0 / 14%));
-    display: grid;
-    gap: 12px;
   }
 
   .status-banner {
@@ -172,8 +170,45 @@ export const styles = css`
   }
 
   .metric {
+    align-items: flex-start;
     display: grid;
     gap: 6px;
+    justify-content: stretch;
+    min-height: 74px;
+    text-align: left;
+  }
+
+  .metric.history-metric::after {
+    color: var(--secondary-text-color);
+    content: 'History';
+    font-size: 11px;
+  }
+
+  .bubble-panel {
+    gap: 12px;
+    min-height: 150px;
+  }
+
+  .bubble-panel-heading {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .bubble-panel-heading span {
+    color: var(--secondary-text-color);
+    font-size: 13px;
+    text-transform: capitalize;
+  }
+
+  .bubble-grid {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .power-bubbles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .metric.unavailable {
@@ -243,6 +278,11 @@ export const styles = css`
     opacity: 0.5;
   }
 
+  button.metric:disabled {
+    cursor: default;
+    opacity: 1;
+  }
+
   .confirm-backdrop {
     align-items: center;
     background: rgb(0 0 0 / 28%);
@@ -273,7 +313,9 @@ export const styles = css`
     }
 
     .signal-row,
-    .metric-row {
+    .metric-row,
+    .bubble-grid,
+    .power-bubbles {
       grid-template-columns: 1fr;
     }
   }
