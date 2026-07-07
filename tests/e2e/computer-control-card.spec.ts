@@ -143,12 +143,16 @@ test.describe('Computer Control Card demo', () => {
     await expect(signal(page, 'draw')).toHaveClass(/unknown/);
   });
 
-  test('Wake PC calls wake_on_lan.send_magic_packet with configured MAC and broadcast address', async ({ page }) => {
+  test('Wake PC requires confirmation, then calls wake_on_lan.send_magic_packet with configured MAC and broadcast address', async ({ page }) => {
     const consoleErrors = expectNoConsoleErrors(page);
     await gotoDemo(page);
     await signal(page, 'pc').click();
 
     await actionButton(card(page, 'compact'), 'Wake PC').click();
+    await expect(card(page, 'compact').locator('.confirm-dialog')).toBeVisible();
+    await expect(card(page, 'compact').locator('.confirm-dialog')).toContainText('Wake this computer?');
+    await expect(page.locator('[data-service-call="wake_on_lan.send_magic_packet"]')).toHaveCount(0);
+    await acceptConfirmation(card(page, 'compact')).click();
 
     await expectServiceCall(page, 'wake_on_lan.send_magic_packet', {
       mac: wakeMac,
