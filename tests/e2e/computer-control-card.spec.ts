@@ -104,19 +104,18 @@ test.describe('Computer Control Card demo', () => {
     await gotoDemo(page);
 
     await signal(page, 'outlet').click();
-    await expect(card(page, 'compact').locator('.bubble-panel')).toContainText('Power Outlet');
+    await expect(card(page, 'compact').locator('.bubble-panel')).not.toContainText('Power Outlet');
     await expect(actionButton(card(page, 'compact'), 'Outlet On')).toBeVisible();
     await expect(actionButton(card(page, 'compact'), 'Outlet Off')).toBeVisible();
 
     await signal(page, 'pc').click();
-    await expect(card(page, 'compact').locator('.bubble-panel')).toContainText('PC Status');
+    await expect(card(page, 'compact').locator('.bubble-panel')).not.toContainText('PC Status');
     await expect(actionButton(card(page, 'compact'), 'Wake PC')).toBeVisible();
     await expect(actionButton(card(page, 'compact'), 'Shutdown')).toBeVisible();
 
     await signal(page, 'draw').click();
     const drawPanel = card(page, 'compact').locator('.bubble-panel');
-    await expect(drawPanel).toContainText('Power');
-    await expect(drawPanel).toContainText(/Now|— W/);
+    await expect(drawPanel).toContainText(/Current|— W/);
     await expect(drawPanel).toContainText(/Today|— kWh/);
     await expect(drawPanel).toContainText(/Month|— kWh/);
 
@@ -135,7 +134,7 @@ test.describe('Computer Control Card demo', () => {
     });
 
     await expect(signal(page, 'draw')).toHaveAttribute('aria-pressed', 'true');
-    await card(page, 'compact').locator('.bubble-panel .metric.history-metric').filter({ hasText: 'Now' }).click();
+    await card(page, 'compact').locator('.bubble-panel .metric.history-metric').filter({ hasText: 'Current' }).click();
     await expect(page.locator('body')).toHaveAttribute('data-more-info-entity', powerEntity);
 
     expect(consoleErrors).toEqual([]);
@@ -304,7 +303,6 @@ test.describe('Computer Control Card demo', () => {
 
     await signal(page, 'draw').click();
     const drawPanel = card(page, 'compact').locator('.bubble-panel');
-    await expect(drawPanel).toContainText('Power');
     await expect(drawPanel.locator('.metric.unavailable').filter({ hasText: 'Today' })).toHaveText(/Today\s*Unavailable/);
     await expect(drawPanel.locator('.metric.unavailable').filter({ hasText: 'Month' })).toHaveText(/Month\s*Unavailable/);
     await expect(drawPanel).not.toContainText('— kWh');
