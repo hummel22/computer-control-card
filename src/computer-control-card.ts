@@ -8,7 +8,7 @@ import type { ComputerControlActionConfig, ComputerControlActionKey, ComputerCon
 const CARD_TYPE = 'custom:computer-control-card';
 const DEFAULT_THRESHOLDS = { idleWatts: 10, activeWatts: 40 };
 const CARD_LAYOUT = {
-  compact: { columns: 6, rows: 8, cardSize: 8 },
+  compact: { columns: 6, rows: 6, cardSize: 6 },
   extended: { columns: 12, rows: 11, cardSize: 11 },
 } as const;
 

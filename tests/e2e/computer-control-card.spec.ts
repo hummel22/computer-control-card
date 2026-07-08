@@ -90,12 +90,14 @@ test.describe('Computer Control Card demo', () => {
     }));
 
     expect(measurements).toEqual(expect.arrayContaining([
-      expect.objectContaining({ variant: 'compact', cardSize: 8, gridRows: 8 }),
+      expect.objectContaining({ variant: 'compact', cardSize: 6, gridRows: 6 }),
       expect.objectContaining({ variant: 'extended', cardSize: 11, gridRows: 11 }),
     ]));
 
     for (const measurement of measurements) {
-      expect(measurement.gridRows * 56).toBeGreaterThanOrEqual(measurement.renderedHeight);
+      const allocatedHeight = measurement.gridRows * 56;
+      expect(allocatedHeight).toBeGreaterThanOrEqual(measurement.renderedHeight);
+      expect(allocatedHeight - measurement.renderedHeight).toBeLessThanOrEqual(80);
     }
   });
 
@@ -118,6 +120,19 @@ test.describe('Computer Control Card demo', () => {
     await expect(drawPanel).toContainText(/Current|— W/);
     await expect(drawPanel).toContainText(/Today|— kWh/);
     await expect(drawPanel).toContainText(/Month|— kWh/);
+
+    const powerMetricLayout = await drawPanel.locator('.power-metric').first().evaluate((metric) => {
+      const label = metric.querySelector('span')!.getBoundingClientRect();
+      const value = metric.querySelector('strong')!.getBoundingClientRect();
+      return {
+        labelLeft: Math.round(label.left),
+        valueLeft: Math.round(value.left),
+        labelBottom: label.bottom,
+        valueTop: value.top,
+      };
+    });
+    expect(powerMetricLayout.valueLeft).toBe(powerMetricLayout.labelLeft);
+    expect(powerMetricLayout.valueTop).toBeGreaterThanOrEqual(powerMetricLayout.labelBottom);
 
     expect(consoleErrors).toEqual([]);
   });

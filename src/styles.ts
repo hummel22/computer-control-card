@@ -233,14 +233,21 @@ export const styles = css`
   }
 
   .compact .power-metric {
+    align-items: center;
     display: grid;
-    gap: 6px;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 2px 6px;
+    grid-template-columns: auto minmax(0, 1fr);
+    justify-content: start;
     text-align: left;
+  }
+
+  .compact .power-metric ha-icon {
+    grid-row: 1 / span 2;
   }
 
   .compact .power-metric span,
   .compact .power-metric strong {
+    grid-column: 2;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
