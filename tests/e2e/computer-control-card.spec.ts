@@ -71,7 +71,7 @@ test.describe('Computer Control Card demo', () => {
     expect(consoleErrors).toEqual([]);
   });
 
-  test('reports grid rows large enough for rendered card content', async ({ page }) => {
+  test('reports compact grid rows without extra reserved space', async ({ page }) => {
     await gotoDemo(page);
 
     const measurements = await page.locator('[data-card-host="dashboard-medium"] computer-control-card').evaluateAll((elements) => elements.map((element) => {
@@ -90,15 +90,30 @@ test.describe('Computer Control Card demo', () => {
     }));
 
     expect(measurements).toEqual(expect.arrayContaining([
-      expect.objectContaining({ variant: 'compact', cardSize: 6, gridRows: 6 }),
+      expect.objectContaining({ variant: 'compact', cardSize: 5, gridRows: 5 }),
       expect.objectContaining({ variant: 'extended', cardSize: 11, gridRows: 11 }),
     ]));
 
     for (const measurement of measurements) {
-      const allocatedHeight = measurement.gridRows * 56;
+      const allocatedHeight = measurement.variant === 'compact'
+        ? measurement.gridRows * 56 + (measurement.gridRows - 1) * 8
+        : measurement.gridRows * 56;
       expect(allocatedHeight).toBeGreaterThanOrEqual(measurement.renderedHeight);
       expect(allocatedHeight - measurement.renderedHeight).toBeLessThanOrEqual(80);
     }
+
+    await configureDashboardCard(page, 'compact', { title: undefined });
+    const untitledCompactLayout = await card(page, 'compact').evaluate((element) => {
+      const cardElement = element as HTMLElement & {
+        getCardSize: () => number;
+        getGridOptions: () => { rows: number };
+      };
+      return {
+        cardSize: cardElement.getCardSize(),
+        gridRows: cardElement.getGridOptions().rows,
+      };
+    });
+    expect(untitledCompactLayout).toEqual({ cardSize: 4, gridRows: 4 });
   });
 
   test('compact signal clicks switch the bubble panel', async ({ page }) => {
