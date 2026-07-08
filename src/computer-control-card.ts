@@ -207,7 +207,7 @@ export class ComputerControlCard extends LitElement {
           ${this._renderSignal('pc', 'PC Status', status, 'mdi:desktop-tower', this._pcSignalState(status))}
           ${this._renderSignal('draw', 'System Draw', this._powerMetric(entity, powerEntity), 'mdi:flash', this._powerSignalState(powerEntity))}
         </div>
-        ${this._renderPanel(this._activePanel, entity, energyTodayEntity, energyMonthEntity, energyTotalEntity, status)}
+        ${this._renderPanel(this._activePanel, entity, energyTodayEntity, energyMonthEntity)}
         ${this._renderConfirmationDialog()}
       </div>
     `;
@@ -274,52 +274,35 @@ export class ComputerControlCard extends LitElement {
     entity: HassEntity | undefined,
     energyTodayEntity: HassEntity | undefined,
     energyMonthEntity: HassEntity | undefined,
-    energyTotalEntity: HassEntity | undefined,
-    status: string,
   ) {
     if (key === 'outlet') {
       return html`
-        <section class="bubble-panel" aria-live="polite">
-          <div class="bubble-panel-heading">
-            <h3>Power Outlet</h3>
-            <span>${this._outletStatus(entity, getEntity(this.hass, this._config?.outlet_entity))}</span>
-          </div>
+        <div class="bubble-panel action-panel" aria-live="polite">
           <div class="bubble-grid">
             ${this._renderActionButton('Outlet On', 'mdi:power-plug', this._findAction('outlet_on'))}
             ${this._renderActionButton('Outlet Off', 'mdi:power-plug-off', this._findAction('outlet_off'))}
           </div>
-          <div class="warning">Hard power cuts can cause data loss.</div>
-        </section>
+        </div>
       `;
     }
     if (key === 'pc') {
       return html`
-        <section class="bubble-panel" aria-live="polite">
-          <div class="bubble-panel-heading">
-            <h3>PC Status</h3>
-            <span>${status}</span>
-          </div>
+        <div class="bubble-panel action-panel" aria-live="polite">
           <div class="bubble-grid">
             ${this._renderActionButton('Wake PC', 'mdi:power', this._findAction('wake'))}
             ${this._renderActionButton('Shutdown', 'mdi:power-off', this._findAction('shutdown'))}
           </div>
-          <div class="warning">Shutdown is intended to be graceful and may take time to complete.</div>
-        </section>
+        </div>
       `;
     }
     return html`
-      <section class="bubble-panel" aria-live="polite">
-        <div class="bubble-panel-heading">
-          <h3>Power</h3>
-          <span>${this._metric(entity, ['trend', 'power_trend'], status)}</span>
-        </div>
+      <div class="bubble-panel power-panel" aria-live="polite">
         <div class="bubble-grid power-bubbles">
-          ${this._renderMetric('Now', this._powerMetric(entity, getEntity(this.hass, this._config?.power_entity)), this._config?.power_entity)}
-          ${this._renderMetric('Today', this._entityMetricValue(energyTodayEntity, entity, ['today_kwh', 'energy_today']), this._config?.energy_today_entity)}
-          ${this._renderMetric('Month', this._entityMetricValue(energyMonthEntity, entity, ['month_kwh', 'energy_month']), this._config?.energy_month_entity)}
-          ${energyTotalEntity ? this._renderMetric('Total', this._entityMetricValue(energyTotalEntity, entity, ['total_kwh', 'energy_total']), this._config?.energy_total_entity) : nothing}
+          ${this._renderPowerMetric('Current', 'mdi:flash', this._powerMetric(entity, getEntity(this.hass, this._config?.power_entity)), this._config?.power_entity)}
+          ${this._renderPowerMetric('Today', 'mdi:calendar-today', this._entityMetricValue(energyTodayEntity, entity, ['today_kwh', 'energy_today']), this._config?.energy_today_entity)}
+          ${this._renderPowerMetric('Month', 'mdi:calendar-month', this._entityMetricValue(energyMonthEntity, entity, ['month_kwh', 'energy_month']), this._config?.energy_month_entity)}
         </div>
-      </section>
+      </div>
     `;
   }
 
@@ -327,6 +310,18 @@ export class ComputerControlCard extends LitElement {
     const normalized = typeof metric === 'string' ? { present: true, value: metric } : metric;
     const showHistory = Boolean(historyEntityId && normalized.present);
     return html`<button class=${`metric${normalized.present ? '' : ' unavailable'}${showHistory ? ' history-metric' : ''}`} type="button" ?disabled=${!showHistory} aria-disabled=${normalized.present ? nothing : 'true'} @click=${() => historyEntityId && normalized.present && this._showMoreInfo(historyEntityId)}><span>${label}</span><strong>${normalized.value}</strong></button>`;
+  }
+
+  private _renderPowerMetric(label: string, icon: string, metric: string | MetricValue, historyEntityId?: string) {
+    const normalized = typeof metric === 'string' ? { present: true, value: metric } : metric;
+    const showHistory = Boolean(historyEntityId && normalized.present);
+    return html`
+      <button class=${`metric power-metric${normalized.present ? '' : ' unavailable'}${showHistory ? ' history-metric' : ''}`} type="button" ?disabled=${!showHistory} aria-disabled=${normalized.present ? nothing : 'true'} @click=${() => historyEntityId && normalized.present && this._showMoreInfo(historyEntityId)}>
+        <ha-icon .icon=${icon}></ha-icon>
+        <span>${label}</span>
+        <strong>${normalized.value}</strong>
+      </button>
+    `;
   }
 
   private _renderConfirmationDialog() {

@@ -178,15 +178,8 @@ export const styles = css`
     text-align: left;
   }
 
-  .metric.history-metric::after {
-    color: var(--secondary-text-color);
-    content: 'History';
-    font-size: 11px;
-  }
-
   .bubble-panel {
     gap: 12px;
-    min-height: 150px;
   }
 
   .bubble-panel-heading {
@@ -209,6 +202,48 @@ export const styles = css`
 
   .power-bubbles {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .compact .bubble-panel {
+    min-height: auto;
+  }
+
+  .compact .bubble-grid button {
+    background: color-mix(in srgb, var(--secondary-background-color, #f4f4f4) 88%, var(--primary-color));
+    border-color: color-mix(in srgb, var(--primary-color) 12%, var(--divider-color));
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 6%);
+    min-height: 22px;
+    padding: 4px 8px;
+  }
+
+  .compact .action-panel .bubble-grid button {
+    justify-content: flex-start;
+  }
+
+  .compact .bubble-grid button ha-icon {
+    --mdc-icon-size: 16px;
+    color: var(--primary-color);
+  }
+
+  .compact .bubble-grid button span,
+  .compact .bubble-grid button strong {
+    font-size: 11px;
+    line-height: 1.1;
+  }
+
+  .compact .power-metric {
+    display: grid;
+    gap: 6px;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    text-align: left;
+  }
+
+  .compact .power-metric span,
+  .compact .power-metric strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .metric.unavailable {
