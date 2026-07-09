@@ -8,7 +8,7 @@ import type { ComputerControlActionConfig, ComputerControlActionKey, ComputerCon
 const CARD_TYPE = 'custom:computer-control-card';
 const DEFAULT_THRESHOLDS = { idleWatts: 10, activeWatts: 40 };
 const CARD_LAYOUT = {
-  compact: { columns: 6, rows: 6, cardSize: 6 },
+  compact: { columns: 6, rows: 4, cardSize: 4 },
   extended: { columns: 12, rows: 11, cardSize: 11 },
 } as const;
 
@@ -172,7 +172,15 @@ export class ComputerControlCard extends LitElement {
   }
 
   private _layout() {
-    return this._config?.variant === 'extended' ? CARD_LAYOUT.extended : CARD_LAYOUT.compact;
+    if (this._config?.variant === 'extended') {
+      return CARD_LAYOUT.extended;
+    }
+
+    return {
+      ...CARD_LAYOUT.compact,
+      rows: this._config?.title ? 5 : CARD_LAYOUT.compact.rows,
+      cardSize: this._config?.title ? 5 : CARD_LAYOUT.compact.cardSize,
+    };
   }
 
   private _renderCompact(
